@@ -1,0 +1,11 @@
+Package: StatComp21049
+Title: To calculate the phase space of worm movement
+Version: 0.0.0.9000
+Authors@R: 
+    person("Rongkang", "Xiong", , "earth@mail.ustc.edu.cn", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: a package to test the Rcpp and R packages (one paragraph).
+License: GPL (>= 2)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
