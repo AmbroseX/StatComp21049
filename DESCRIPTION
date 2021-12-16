@@ -1,5 +1,5 @@
 Package: StatComp21049
-Title: To calculate the phase space of worm movement
+Title: To calculate the phase space of worm movements
 Version: 0.0.0.9000
 Authors@R: 
     person("Rongkang", "Xiong", , "earth@mail.ustc.edu.cn", role = c("aut", "cre"),
