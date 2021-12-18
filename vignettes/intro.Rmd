@@ -1,0 +1,18 @@
+---
+title: "Introduction to my function"
+author: "Rongkang Xiong"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to my function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## homework 1
+
+test1
+## homework 2
+
+test2
