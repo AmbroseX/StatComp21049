@@ -6,7 +6,12 @@ Authors@R:
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: a package to test the Rcpp and R packages (one paragraph).
 License: MIT + file LICENSE
-Imports: Rcpp,boot,bootstrap,microbenchmark
+Imports: 
+    Rcpp,
+    boot,
+    bootstrap,
+    microbenchmark,
+    stats
 LinkingTo: Rcpp
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2

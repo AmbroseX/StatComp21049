@@ -2,6 +2,7 @@ usethis::use_package("Rcpp")
 usethis::use_package("microbenchmark")
 usethis::use_package("boot")
 usethis::use_package("bootstrap")
+usethis::use_package("stats")
 
 
 
