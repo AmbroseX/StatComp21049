@@ -417,7 +417,8 @@ paste('E[X(10)]=',mean(x))
 paste('Var(X(10)=',var(x))
 ```
 
-理论计算值： $$
+理论计算值
+$$
 E[X(t)]=\lambda t E[Y_1]=10\lambda a/\lambda_{gamma} \\
 Var[x]=\lambda t E[Y_1^2]=10\lambda (a+a^2)/\lambda_{gamma}^2
 $$
@@ -503,4 +504,122 @@ Var10<-10*lambda.poison*(a+a^2)/lambda.gamma^2
 paste("E[X(10)]=",Ex10,",Var[X(10)]=",Var10)
 ```
 
+------------------------------------------------------------------------
+## The homework 2 2021-09-30
 
+### Question
+
+Exercises 5.4, 5.9, 5.13, and 5.14 (pages 149-151, Statistical
+Computating with R)
+
+### Answer
+
+#### 5.4
+
+Write a function to compute a Monte Carlo estimate of the
+$\operatorname{Beta}(3,3)$ cdf, and use the function to estimate $F(x)$
+for $x=0.1,0.2, \ldots, 0.9$. Compare the estimates with the values
+returned by the pbeta function in $R$.
+
+解： $Beta(x;a,b)$分布的概率密度函数为
+$$
+f(x;a,b)=\frac{1}{B(a,b)} x^{a-1}(1-x)^{b-1}
+$$
+Beta函数定义：
+
+$$
+B(a,b)=\int_{0}^{1} t^{a-1}(1-t)^{b-1} d t
+$$
+$pbeta$的定义：
+$$pbeta(x,a,b) =\frac{1}{B(a,b)} \int _0^x t^{a-1}(1-t)^{b-1}dt$$
+$$
+B(3, 3)=\int_{0}^{1} t^{2}(1-t)^{2} d t
+$$
+首先我们计算$B(3,3)$的积分估计
+$$
+B(3,3)=\int_{0}^{1} t^{2}(1-t)^{2} d t=E[t^2(1-t)^2] , \quad t\sim U(0,1)
+$$
+然后可以计算$pbeta(x,3,3)$的估计
+$$
+pbeta(x,3,3) =\frac{1}{B(3,3)} \int _0^x t^{2}(1-t)^{2}dt = \frac{x}{B(3,3)}E[t^2(1-t)^2],\quad t\sim U(0,x)
+$$
+
+```{r}
+m<-1e4;x<-runif(m,min=0,max=1)
+theta.hat <- mean(x^2*(1-x)^2)
+result = matrix(0,1,2)
+result[1,1] = theta.hat
+result[1,2] = beta(3,3)
+rownames(result) = c("Beta(3,3)")
+colnames(result) = c("Estimate", "Theoretical")
+result
+```
+
+编写求cdf的函数：
+
+```{r}
+rm(list=ls())
+
+pbetaCDF <- function(x,a,b) {
+  pbetax<-numeric(length(x))
+  m<-1e6;
+  y<-runif(m,min=0,max=1)
+  Beta_a_b <- mean(y^(a-1)*(1-y)^(b-1))
+  for(i in 1:length(x)){
+    n<-1e6;
+    y<-runif(n,min=0,max = x[i])
+    Beta_x <- x[i]*mean(y^(a-1)*(1-y)^(b-1))
+    pbetax[i] <- Beta_x/Beta_a_b
+    }
+  return(pbetax)
+}
+x<-seq(0.1,1,0.1)
+y<-pbetaCDF(x,3,3)
+print(y)
+```
+
+比较自定义函数和pbeta函数
+
+```{r}
+x<-seq(0.1,1,0.1)
+result = matrix(0,3,length(x))
+result[1,1:length(x)] = x
+result[2,1:length(x)] = pbetaCDF(x,3,3)
+result[3,1:length(x)] = pbeta(x,3,3)
+rownames(result) = c("x","pbetaCDF(3,3)","pbeta(x,3,3)")
+colnames(result) = c(x)
+result
+```
+
+#### 5.9
+
+The Rayleigh density $[156,(18.76)]$ is 
+$$
+f(x)=\frac{x}{\sigma^{2}} e^{-x^{2} /\left(2 \sigma^{2}\right)}, \quad x \geq 0, \sigma>0
+$$ 
+Implement a function to generate samples from a Rayleigh $(\sigma)$
+distribution, using antithetic variables. What is the percent reduction
+in variance of $\frac{X+X^{\prime}}{2}$ compared with
+$\frac{X_{1}+X_{2}}{2}$ for independent $X_{1}, X_{2} ?$
+
+解： 
+$$
+\begin{align}
+& F(x) = \int_0^x \frac{t}{\sigma^{2}} e^{-t^{2} /\left(2 \sigma^{2}\right)}dt=1-e^{-x^2/{2\sigma^2}} \\
+& y=1-e^{-x^2/{2\sigma^2}} \\
+&\Rightarrow x =\sigma\sqrt{-2ln(1-y)} \\
+& \Rightarrow x' =\sigma\sqrt{-2ln(y)} , \quad y\in[0,1]
+\end{align}
+$$ 
+因此方差 
+$$
+\begin{align}
+E(X) &= \sigma^2\int_0^1 \sqrt{-2ln(1-y)}dy=\sqrt{\frac{\pi}{2}}\sigma \\
+E(X') &= \sigma^2\int_0^1 \sqrt{-2ln(y)}dy=\sqrt{\frac{\pi}{2}}\sigma \\
+Var(X) & = \sigma^2\int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})^2dy = (2-\frac{\pi}{2})\sigma^2\\
+Var(X') &= \sigma^2\int_0^1 (\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})^2dy =(2-\frac{\pi}{2})\sigma^2 \\
+Cov(X,X') &= \sigma^2 \int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})(\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})dy\\
+Var(\frac{X+X'}{2}) &= (Var(X)+Var({X'})+2Cov(X,X'))/4 \\
+&=1-\frac{\pi}{4}+\frac{1}{2}\sigma^2 \int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})(\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})dy
+\end{align}
+$$ 

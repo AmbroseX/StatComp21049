@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of StatComp21049 is to ...
+StatComp21049 is a R package developed to present the homework of statistic computing course by author 21049 and Calculate the Phase space for worm behavior.
 
 ## Installation
 
