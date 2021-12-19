@@ -1,11 +1,29 @@
 Package: StatComp21049
-Title: To calculate the phase space of worm movement
-Version: 0.0.0.9000
+Title: To calculate the phase space of worm movements
+Version: 0.0.1
 Authors@R: 
     person("Rongkang", "Xiong", , "earth@mail.ustc.edu.cn", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: a package to test the Rcpp and R packages (one paragraph).
-License: GPL (>= 2)
-Encoding: UTF-8
+License: MIT + file LICENSE
+Imports: 
+    Rcpp,
+    boot,
+    bootstrap,
+    microbenchmark,
+    stats,
+    base,
+    utils,
+    FNN,
+    energy,
+    Ball
+LinkingTo: Rcpp
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
+Encoding: UTF-8
+Suggests: knitr,rmarkdown
+VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)
+LazyData: true
+LazyDataCompression: xz
