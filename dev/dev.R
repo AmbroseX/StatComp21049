@@ -13,6 +13,14 @@ usethis::use_mit_license("Rongkang Xiong")
 usethis::use_readme_md()
 usethis::use_code_of_conduct("earth@mail.ustc.edu.cn")
 
+# Vignette workflow
+usethis::use_vignette("homework")
+usethis::use_vignette("intro")
+
+
+
+# 导出vignettes
+devtools::build_vignettes()
 
 
 # CRAN
@@ -25,3 +33,9 @@ devtools::check_win_devel()
 
 # 检查
 devtools::release()
+
+
+
+# 导入包运行
+devtools::load_all()
+

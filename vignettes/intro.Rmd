@@ -1,29 +1,30 @@
 ---
-title: "Introduction to my function"
-author: "Rongkang Xiong"
-date: "`r Sys.Date()`"
+title: "intro"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to my function}
+  %\VignetteIndexEntry{intro}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include=FALSE}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 ```
 
-# 载入包
-
 ```{r setup}
 library(StatComp21049)
 ```
 
-## homework 1
 
-test1 \#\# homework 2
+# The Guide to my functions
 
-test2
+## Get_Matrix_Eigens
+
+
+# test
+
+
+# test
