@@ -648,3 +648,141 @@ m<-1e5;y<-runif(m)
 covx12 <- mean((sqrt(-2*log(y))-sqrt(pi/2))*(sqrt(-2*log(1-y))-sqrt(pi/2)))
 paste("Cov(X,X') = ",covx12)
 ```
+
+(2)因此$X,X'$是负相关的
+我们可以模拟计算理论上方差减小百分比
+
+```
+rm(list=ls())
+m<-1e5;y<-runif(m)
+covx12 <- mean((sqrt(-2*log(y))-sqrt(pi/2))*(sqrt(-2*log(1-y))-sqrt(pi/2)))
+
+result <-matrix(0,5,1)
+result[1,1] <- 2-pi/2
+result[2,1] <- covx12
+result[3,1] <- 1-pi/4+1/2*covx12
+result[4,1] <- 1-pi/4
+result[5,1] <- paste("Percent reduction = ",2/(pi-4)*covx12*100,"%")
+rownames(result) = c("Var(X) = ","Cov(X,X') = ","Var((X+X')/2) =","Var((X1+X2)/2) =","Percent reduction = ")
+colnames(result) = c("理论计算值")
+result
+```
+
+(3)实验上方差减小百分比
+
+```
+rm(list=ls())
+m<-1e5;y<-runif(m)
+y1<-y[1:m/2]
+x1<-sqrt(-2*log(1-y1))
+x2<-sqrt(-2*log(y1))
+covx12<-mean((x1-mean(x1))*(x2-mean(x2)))
+u1<-(x1+x2)/2
+var12 <- var(u1)
+x3<-sqrt(-2*log(runif(m/2)))
+x4<-sqrt(-2*log(runif(m/2)))
+var12in <-var((x3+x4)/2)
+result <-matrix(0,6,1)
+result[1,1] <- var(x1)
+result[2,1] <- var(x2)
+result[3,1] <- covx12
+result[4,1] <- var12
+result[5,1] <- var12in
+result[6,1] <- paste((var12in-var12)/var12in*100,"%")
+rownames(result) = c("Var(X) = ","Var(X') = ","Cov(X,X') = ","Var((X+X')/2) =","Var((X1+X2)/2) =","Percent reduction = ")
+colnames(result) = c("  MC模拟计算值")
+result
+```
+
+#### 5.13
+
+Find two importance functions $f_{1}$ and $f_{2}$ that are supported on
+$(1, \infty)$ and are 'close' to
+$$
+g(x)=\frac{x^{2}}{\sqrt{2 \pi}} e^{-x^{2} / 2}, \quad x>1
+$$
+Which of your two importance functions should produce the smaller
+variance in estimating
+$$
+\int_{1}^{\infty} \frac{x^{2}}{\sqrt{2 \pi}} e^{-x^{2} / 2} d x
+$$
+by importance sampling? Explain.
+
+解
+$$
+\begin{align}
+\hat{\theta} &=\int_{1}^{\infty} \frac{x^{2}}{\sqrt{2 \pi}} e^{-x^{2} / 2} d x \\
+& = \int_{1}^{\infty} \frac{g(x)}{f(x)}f(x)d x \\
+& = \frac{1}{m} \sum_{i=1}^m \frac{g(x_i)}{f(x_i)}
+\end{align}
+$$
+取
+$$
+\begin{align}
+& let \quad f_1(x) =2exe^{-x^2} ,\quad f_2(x)=e^{-x+1} \\
+& F_1(x)=1-e^{1-x^2},F_2(x)=1-e^{1-x}\\
+& \frac{g(x)}{f_1(x)} = \frac{x}{2e\sqrt{2\pi}}e^{x^2/2} \\
+& \frac{g(x)}{f_2(x)} = \frac{x^2}{\sqrt{2\pi}}e^{x-x^2/2-1}\\
+&y_1=F_1(x_1) \Rightarrow x_1= \sqrt{1-ln(1-y_1)}=\sqrt{1-ln(y_1)}\\
+&y_2=F_2(x_2) \Rightarrow x_2= 1-ln(1-y_2)=1-ln(y_2)
+\end{align}
+$$
+
+```{r}
+rm(list=ls())
+m<-1e5
+y<-runif(m,min=0,max=1)
+x1<-sqrt(1-log(y))
+x2<-1-log(y)
+f1<-x1/(2*exp(1)*sqrt(2*pi))*exp((x1^2)/2)
+f2<-x2^2/(sqrt(2*pi))*exp(x2-(x2^2)/2-1)
+result = matrix(0,2,2)
+result[1,1] = mean(f1)
+result[1,2] = mean(f1)
+result[2,1] = sd(f1)
+result[2,2] = sd(f2)
+rownames(result) = c("est","sd")
+colnames(result) = c("f1(x)","f2(x)")
+result
+```
+
+Here 'est' is $\hat{\theta}$ while 'sd' is the standard deviation of
+$\frac{g(Xi )}{f (Xi )}$ instead of $\hat{\theta}$ So $f_2(x)=e^{-x+1}$
+produce the smaller variance in estimating.
+
+#### 5.14
+
+Obtain a Monte Carlo estimate of
+$$
+\int_{1}^{\infty} \frac{x^{2}}{\sqrt{2 \pi}} e^{-x^{2} / 2} d x
+$$
+by importance sampling.
+
+解： 和5.13中的方法一样，选取$f_2(x)=e^{-x+1}$
+$$
+\begin{align}
+& F(x)=1-e^{1-x}\\
+& \frac{g(x)}{f(x)} = \frac{x^2}{\sqrt{2\pi}}e^{x-x^2/2-1}\\
+&y=F(x_2) \Rightarrow x= 1-ln(1-y)=1-ln(y)
+\end{align}
+$$
+
+```
+rm(list=ls())
+m<-1e5
+y<-runif(m,min=0,max=1)
+x<-1-log(y)
+f<-x^2/(sqrt(2*pi))*exp(x-(x^2)/2-1)
+result = matrix(0,2,1)
+result[1,1] = mean(f)
+result[2,1] = sd(f)
+rownames(result) = c("est","sd")
+colnames(result) = c("f1(x)")
+result
+paste("积分估计值 theta.hat = ",mean(f))
+```
+
+------------------------------------------------------------------------
+
+
+
