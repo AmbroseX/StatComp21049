@@ -9,10 +9,21 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# 载入包
+
+```{r setup}
+library(StatComp21049)
+```
 
 ## homework 1
 
-test1
-## homework 2
+test1 \#\# homework 2
 
 test2

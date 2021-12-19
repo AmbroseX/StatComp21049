@@ -3,12 +3,25 @@ usethis::use_package("microbenchmark")
 usethis::use_package("boot")
 usethis::use_package("bootstrap")
 usethis::use_package("stats")
+usethis::use_package("base")
+usethis::use_package("utils")
 
 
 
-
-
+usethis::use_rcpp()
 usethis::use_mit_license("Rongkang Xiong")
 usethis::use_readme_md()
 usethis::use_code_of_conduct("earth@mail.ustc.edu.cn")
 
+
+
+# CRAN
+# 拼写检查
+devtools::spell_check()
+# 常规本地测试
+devtools::check()
+# Windows平台测试
+devtools::check_win_devel()
+
+# 检查
+devtools::release()

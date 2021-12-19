@@ -5,6 +5,7 @@
 curve_data <- read.csv("data-raw/curve_data.csv",header = FALSE)
 time_Elapsed <- read.csv("data-raw/TimeElapsed.csv",header = FALSE)
 
-usethis::use_data(curve_data,time_Elapsed,overwrite = TRUE)
+usethis::use_data(curve_data, compress = "xz", overwrite = TRUE)
+usethis::use_data(time_Elapsed, compress = "xz", overwrite = TRUE)
 
-# testdata <- R.matlab::readMat('./data-raw/wormdata.mat')
+

@@ -1,4 +1,4 @@
-#' @title A function that Calculates the dimensionality of the matrix
+#' @title A function that Calculates the dimension of the matrix
 #' @description Returns the dimension of the matrix X
 #' @param X a matrix with  T*N size
 #' @return a number, the dimension of the matrix X

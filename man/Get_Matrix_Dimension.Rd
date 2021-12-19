@@ -2,7 +2,7 @@
 % Please edit documentation in R/Get_Matrix_Dimension.R
 \name{Get_Matrix_Dimension}
 \alias{Get_Matrix_Dimension}
-\title{A function that Calculates the dimensionality of the matrix}
+\title{A function that Calculates the dimension of the matrix}
 \usage{
 Get_Matrix_Dimension(X)
 }
@@ -18,8 +18,6 @@ Returns the dimension of the matrix X
 \examples{
 \dontrun{
 X <- matrix(rnorm(200*100),200,100)
-ev <- Get_Matrix_Eigens(X)
-eigenvalues <- ev$values
-eigenvectors <- ev$vectors
+ev <- Get_Matrix_Dimension(X)
 }
 }

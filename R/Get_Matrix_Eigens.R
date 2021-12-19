@@ -10,7 +10,7 @@
 #' eigenvectors <- ev$vectors
 #' }
 Get_Matrix_Eigens <- function(X){
-  CovX <- t(X)%*%X
+  CovX <- t(X)%*%t(t(X))
   ev <- eigen(CovX)
   return(ev)
 }
