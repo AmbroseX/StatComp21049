@@ -504,4 +504,451 @@ paste("E[X(10)]=",Ex10,",Var[X(10)]=",Var10)
 ```
 
 ------------------------------------------------------------------------
+## The homework 2 2021-09-30
+
+### Question
+
+Exercises 5.4, 5.9, 5.13, and 5.14 (pages 149-151, Statistical
+Computating with R)
+
+### Answer
+
+#### 5.4
+
+Write a function to compute a Monte Carlo estimate of the
+$\operatorname{Beta}(3,3)$ cdf, and use the function to estimate $F(x)$
+for $x=0.1,0.2, \ldots, 0.9$. Compare the estimates with the values
+returned by the pbeta function in $R$.
+
+解： $Beta(x;a,b)$分布的概率密度函数为 $$
+f(x;a,b)=\frac{1}{B(a,b)} x^{a-1}(1-x)^{b-1}
+$$ Beta函数定义： $$
+B(a,b)=\int_{0}^{1} t^{a-1}(1-t)^{b-1} d t
+$$ $pbeta$的定义：
+$$pbeta(x,a,b) =\frac{1}{B(a,b)} \int _0^x t^{a-1}(1-t)^{b-1}dt$$ $$
+B(3, 3)=\int_{0}^{1} t^{2}(1-t)^{2} d t
+$$ 首先我们计算$B(3,3)$的积分估计
+$$B(3,3)=\int_{0}^{1} t^{2}(1-t)^{2} d t=E[t^2(1-t)^2] , \quad t\sim U(0,1)$$\
+然后可以计算$pbeta(x,3,3)$的估计
+$$pbeta(x,3,3) =\frac{1}{B(3,3)} \int _0^x t^{2}(1-t)^{2}dt = \frac{x}{B(3,3)}E[t^2(1-t)^2],\quad t\sim U(0,x)$$
+
+```{r}
+m<-1e4;x<-runif(m,min=0,max=1)
+theta.hat <- mean(x^2*(1-x)^2)
+result = matrix(0,1,2)
+result[1,1] = theta.hat
+result[1,2] = beta(3,3)
+rownames(result) = c("Beta(3,3)")
+colnames(result) = c("Estimate", "Theoretical")
+result
+```
+
+编写求cdf的函数：
+
+```{r}
+rm(list=ls())
+
+pbetaCDF <- function(x,a,b) {
+  
+pbetax<-numeric(length(x))
+
+m<-1e6;
+y<-runif(m,min=0,max=1)
+Beta_a_b <- mean(y^(a-1)*(1-y)^(b-1))
+
+for(i in 1:length(x)){
+  n<-1e6;
+  y<-runif(n,min=0,max = x[i])
+  Beta_x <- x[i]*mean(y^(a-1)*(1-y)^(b-1))
+  pbetax[i] <- Beta_x/Beta_a_b
+  
+}
+  
+return(pbetax)
+}
+
+x<-seq(0.1,1,0.1)
+y<-pbetaCDF(x,3,3)
+print(y)
+```
+
+比较自定义函数和pbeta函数
+
+```{r}
+x<-seq(0.1,1,0.1)
+result = matrix(0,3,length(x))
+result[1,1:length(x)] = x
+result[2,1:length(x)] = pbetaCDF(x,3,3)
+result[3,1:length(x)] = pbeta(x,3,3)
+rownames(result) = c("x","pbetaCDF(3,3)","pbeta(x,3,3)")
+colnames(result) = c(x)
+result
+```
+
+#### 5.9
+
+The Rayleigh density $[156,(18.76)]$ is $$
+f(x)=\frac{x}{\sigma^{2}} e^{-x^{2} /\left(2 \sigma^{2}\right)}, \quad x \geq 0, \sigma>0
+$$ Implement a function to generate samples from a Rayleigh $(\sigma)$
+distribution, using antithetic variables. What is the percent reduction
+in variance of $\frac{X+X^{\prime}}{2}$ compared with
+$\frac{X_{1}+X_{2}}{2}$ for independent $X_{1}, X_{2} ?$
+
+解： $$\begin{align}
+& F(x) = \int_0^x \frac{t}{\sigma^{2}} e^{-t^{2} /\left(2 \sigma^{2}\right)}dt=1-e^{-x^2/{2\sigma^2}} \\
+& y=1-e^{-x^2/{2\sigma^2}} \\
+&\Rightarrow x =\sigma\sqrt{-2ln(1-y)} \\
+& \Rightarrow x' =\sigma\sqrt{-2ln(y)} , \quad y\in[0,1]
+\end{align}
+$$ 因此方差 $$
+\begin{align}
+E(X) &= \sigma^2\int_0^1 \sqrt{-2ln(1-y)}dy=\sqrt{\frac{\pi}{2}}\sigma \\
+E(X') &= \sigma^2\int_0^1 \sqrt{-2ln(y)}dy=\sqrt{\frac{\pi}{2}}\sigma \\
+Var(X) & = \sigma^2\int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})^2dy = (2-\frac{\pi}{2})\sigma^2\\
+Var(X') &= \sigma^2\int_0^1 (\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})^2dy =(2-\frac{\pi}{2})\sigma^2 \\
+Cov(X,X') &= \sigma^2 \int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})(\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})dy\\
+Var(\frac{X+X'}{2}) &= (Var(X)+Var({X'})+2Cov(X,X'))/4 \\
+&=1-\frac{\pi}{4}+\frac{1}{2}\sigma^2 \int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})(\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})dy
+\end{align}
+$$ 两个独立的随机变量的方差 $$
+\begin{align}
+Cov(X_1,X_2) &= 0 \\
+Var(X_1) &= Var(X_2)=\sigma^2\int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})^2dy = (2-\frac{\pi}{2})\sigma^2\\ \\
+Var(\frac{X_1+X_2}{2}) &=(Var(X_1)+Var(X_2))/4 = 1-\frac{\pi}{4}  \\
+\end{align}
+$$ 因此方差减小的百分比为 \$\$ \begin{align}
+Percent \ reduction &=\frac{(Var_x-Var_{x'})}{Var_x}\times 100\%  \\
+&=\frac{2}{\pi-4}\int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})(\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})dy \times 100\% \\
+
+\end{align} \$\$
+(1)求协方差积分$\frac{1}{\sigma^2}Cov(X,X') = \int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})(\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})dy$
+
+```
+rm(list=ls())
+m<-1e5;y<-runif(m)
+covx12 <- mean((sqrt(-2*log(y))-sqrt(pi/2))*(sqrt(-2*log(1-y))-sqrt(pi/2)))
+paste("Cov(X,X') = ",covx12)
+```
+
+(2)因此$X,X'$是负相关的\
+我们可以模拟计算理论上方差减小百分比
+
+```
+rm(list=ls())
+m<-1e5;y<-runif(m)
+covx12 <- mean((sqrt(-2*log(y))-sqrt(pi/2))*(sqrt(-2*log(1-y))-sqrt(pi/2)))
+
+result <-matrix(0,5,1)
+result[1,1] <- 2-pi/2
+result[2,1] <- covx12
+result[3,1] <- 1-pi/4+1/2*covx12
+result[4,1] <- 1-pi/4
+result[5,1] <- paste("Percent reduction = ",2/(pi-4)*covx12*100,"%")
+rownames(result) = c("Var(X) = ","Cov(X,X') = ","Var((X+X')/2) =","Var((X1+X2)/2) =","Percent reduction = ")
+colnames(result) = c("理论计算值")
+result
+```
+
+(3)实验上方差减小百分比
+
+```{r}
+rm(list=ls())
+m<-1e5;y<-runif(m)
+y1<-y[1:m/2]
+x1<-sqrt(-2*log(1-y1))
+x2<-sqrt(-2*log(y1))
+covx12<-mean((x1-mean(x1))*(x2-mean(x2)))
+u1<-(x1+x2)/2
+var12 <- var(u1)
+
+
+x3<-sqrt(-2*log(runif(m/2)))
+x4<-sqrt(-2*log(runif(m/2)))
+var12in <-var((x3+x4)/2)
+
+result <-matrix(0,6,1)
+result[1,1] <- var(x1)
+result[2,1] <- var(x2)
+result[3,1] <- covx12
+result[4,1] <- var12
+result[5,1] <- var12in
+result[6,1] <- paste((var12in-var12)/var12in*100,"%")
+rownames(result) = c("Var(X) = ","Var(X') = ","Cov(X,X') = ","Var((X+X')/2) =","Var((X1+X2)/2) =","Percent reduction = ")
+colnames(result) = c("  MC模拟计算值")
+result
+```
+
+#### 5.13
+
+Find two importance functions $f_{1}$ and $f_{2}$ that are supported on
+$(1, \infty)$ and are 'close' to $$
+g(x)=\frac{x^{2}}{\sqrt{2 \pi}} e^{-x^{2} / 2}, \quad x>1
+$$ Which of your two importance functions should produce the smaller
+variance in estimating $$
+\int_{1}^{\infty} \frac{x^{2}}{\sqrt{2 \pi}} e^{-x^{2} / 2} d x
+$$ by importance sampling? Explain.
+
+解： $$
+\begin{align}
+\hat{\theta} &=\int_{1}^{\infty} \frac{x^{2}}{\sqrt{2 \pi}} e^{-x^{2} / 2} d x \\
+& = \int_{1}^{\infty} \frac{g(x)}{f(x)}f(x)d x \\
+& = \frac{1}{m} \sum_{i=1}^m \frac{g(x_i)}{f(x_i)}
+\end{align}
+$$ 取 $$\begin{align}
+& let \quad f_1(x) =2exe^{-x^2} ,\quad f_2(x)=e^{-x+1} \\
+& F_1(x)=1-e^{1-x^2},F_2(x)=1-e^{1-x}\\
+& \frac{g(x)}{f_1(x)} = \frac{x}{2e\sqrt{2\pi}}e^{x^2/2} \\
+& \frac{g(x)}{f_2(x)} = \frac{x^2}{\sqrt{2\pi}}e^{x-x^2/2-1}\\
+&y_1=F_1(x_1) \Rightarrow x_1= \sqrt{1-ln(1-y_1)}=\sqrt{1-ln(y_1)}\\
+&y_2=F_2(x_2) \Rightarrow x_2= 1-ln(1-y_2)=1-ln(y_2)
+\end{align}
+$$
+
+```{r}
+rm(list=ls())
+m<-1e5
+y<-runif(m,min=0,max=1)
+x1<-sqrt(1-log(y))
+x2<-1-log(y)
+f1<-x1/(2*exp(1)*sqrt(2*pi))*exp((x1^2)/2)
+f2<-x2^2/(sqrt(2*pi))*exp(x2-(x2^2)/2-1)
+result = matrix(0,2,2)
+result[1,1] = mean(f1)
+result[1,2] = mean(f1)
+result[2,1] = sd(f1)
+result[2,2] = sd(f2)
+rownames(result) = c("est","sd")
+colnames(result) = c("f1(x)","f2(x)")
+result
+```
+
+Here 'est' is $\hat{\theta}$ while 'sd' is the standard deviation of
+$\frac{g(Xi )}{f (Xi )}$ instead of $\hat{\theta}$ So $f_2(x)=e^{-x+1}$
+produce the smaller variance in estimating.
+
+#### 5.14
+
+Obtain a Monte Carlo estimate of $$
+\int_{1}^{\infty} \frac{x^{2}}{\sqrt{2 \pi}} e^{-x^{2} / 2} d x
+$$ by importance sampling.
+
+解： 和5.13中的方法一样，选取$f_2(x)=e^{-x+1}$ $$\begin{align}
+& F(x)=1-e^{1-x}\\
+& \frac{g(x)}{f(x)} = \frac{x^2}{\sqrt{2\pi}}e^{x-x^2/2-1}\\
+&y=F(x_2) \Rightarrow x= 1-ln(1-y)=1-ln(y)
+\end{align}
+$$
+
+```{r}
+rm(list=ls())
+m<-1e5
+y<-runif(m,min=0,max=1)
+x<-1-log(y)
+f<-x^2/(sqrt(2*pi))*exp(x-(x^2)/2-1)
+result = matrix(0,2,1)
+result[1,1] = mean(f)
+result[2,1] = sd(f)
+rownames(result) = c("est","sd")
+colnames(result) = c("f1(x)")
+result
+
+paste("积分估计值 theta.hat = ",mean(f))
+```
+
+------------------------------------------------------------------------
+
+## The homework 3 2021-10-14
+
+### Question
+Exercises 6.5 and 6.A (page 180-181, Statistical Computating
+with R).
+
+### Answer
+#### 6.5
+Suppose a $95\%$ symmetric t-interval is applied to estimate a mean, but the sample data are non-normal. Then the probability that the confidence interval covers the mean is not necessarily equal to 0.95. Use a Monte Carlo experiment to estimate the coverage probability of the t-interval for random samples of $\chi^2_{2}$ data with sample size n = 20.  
+Compare your t-interval results with the simulation results in Example 6.4. (The t-interval should be more robust to departures from normality than the interval for variance.)
+
+解:  
+卡方分布密度
+$$
+\begin{align}
+\chi^2_n(x) &= \frac{1}{2^{n/2}\Gamma(n/2)} x^{n/2-1} e^{-x/2} ,\quad x>0 \\
+E[X]  & = n , \quad Var(X) = 2n \\
+Z_1 \sim \chi^2_{n1},&Z_2 \sim \chi^2_{n2} \Rightarrow Z_1+Z_2 \sim \chi^2_{n_1+n_2}
+\end{align}
+$$
+$$
+\begin{align}
+&if \quad X \sim N(0,1),Y_i \sim \chi_n^2 \quad and \quad X,Y_i \quad independent \\
+&\Rightarrow T=\frac{X}{\sqrt{Y_i/n}} \sim t_n \\
+&\Rightarrow  \sum_{i=1}^m Y_i \sim \chi_{m*n}^2 \\
+&\Rightarrow T=\frac{X}{\sqrt{\sum_{i=1}^m Y_i/(n*m)}} \sim t_{n*m} \\
+&\Rightarrow T=\frac{X}{\sqrt{\bar{Y}/n}} \sim t_{n*m} \\
+\end{align}
+$$
+$$
+\begin{align}
+x_1,x_2,...x_n \sim N(0,1) \\
+T = \frac{\bar{X}-\mu}{S_n/\sqrt{n}} \sim t_{n-1}
+\end{align}
+$$
+```{r}
+rm(list = ls())
+m <- 20
+n <- 2
+alpha <- 0.05
+Y <- rchisq(m,n)
+a<-t.test(Y,conf.level = 1-alpha)
+paste('均值的 95%t-interval:',a[4])
+UCL <- (m-1)*var(Y)/qchisq(alpha,df=m-1)
+paste('upper confidence limits UCL =',UCL)
+```
+```{r}
+rm(list= ls())
+m <- 20
+n <- 2
+alpha <- .05
+mu0 = n
+x <- rchisq(m, df = n)
+LCL <- mu0+var(x)*qt(alpha/2, df = m-1)/sqrt(m)
+UCL <- mu0+var(x)*qt(1-alpha/2, df = m-1)/sqrt(m)
+paste('均值的 95%t-interval:[',LCL,',',UCL,']')
+```
+MC实验 t-interval 包含了均值$\mu = 2$  
+A two sides $100(1−\alpha)\%$ confidence interval of variance is given by $\mu+\frac{S_n}{\sqrt{n}}t_{n-1}(\alpha/2),\mu+\frac{S_n}{\sqrt{n}}t_{n-1}(1-\alpha/2)$  
+
+#### 6.A
+Use Monte Carlo simulation to investigate whether the empirical Type I error rate of the t-test is approximately equal to the nominal significance level $\alpha$, when the sampled population is non-normal. The t-test is robust to mild departures from normality. Discuss the simulation results for the cases where the sampled population is 
+(i) $\chi^2_{1}$
+(ii) Uniform(0,2)
+(iii) Exponential(rate=1).   
+In each case, test $H_0 : \mu = \mu_0 \quad vs \quad H_1 : \mu \neq \mu_0$, where $\mu_0$ is the mean of $\chi^2_{1}$, Uniform(0,2), and Exponential(1), respectively.  
+解:
+单样本t检验，适用于样本均值与总体均值的比较，是检验样本均值所代表的的总体均值是否与理论值有差别
+
+I 型错误率是$H_0$正确，但是推翻$H_0$接受$H_1$的概率是$\alpha$
+$E[\chi_1^2] =  E[u(0,2)] =E[E(1))]= 1$  
+则检验问题变成 $H_0 : \mu = 1 \quad vs \quad H_1 : \mu \neq 1$
+$t1e = \frac{1}{m}\sum_{j=1}^m I(p_j \leq \alpha)$
+
+$T^* = \frac{\bar{X}-\mu_0}{S/\sqrt{n}} \sim t(n-1)$  
+(1) 
+
+```
+rm(list=ls())
+m <- 1e4 ##实验次数
+n <- 1e3 ##每次实验的样本数
+alpha <- 0.05
+mu0 <- 1
+
+p <- numeric(m)  #存储 p-values
+for (j in 1:m){
+  x <- rchisq(n,df = 1)
+  ttest <- t.test(x,alternative = "two.sided",mu = mu0,conf.level =1- alpha)
+  p[j] <- ttest$p.value
+}
+p.hat <- mean(p < alpha)
+se.hat <- sqrt(p.hat * (1 - p.hat) / m)
+print(c(p.hat, se.hat))
+```
+
+观察到的 t1e = 0.051, 估计值的标准误差是 $\hat{se}(\hat{p}) = 0.0022$
+$t1e > \alpha$,但是在一个标准误差范围内，理论上讲,当$\mu =1$时,拒绝空假设的概率正好是 $\alpha$
+模拟从经验上调查，t.test中的p值计算方法是否与理论值$\alpha$相一致  
+实验上发现，t1e和取的样本大小有关，越大和$\alpha$越接近，而越小，偏离越远
+
+```
+rm(list=ls())
+m <- 1e3 ##实验次数
+n <- c(1e1,1e2,5*1e2,1e3,5*1e3,1e4,2*1e4,3*1e4,4*1e4,5*1e4,6*1e4,1e5) ##每次实验的样本数
+alpha <- 0.05
+mu0 <- 1
+p.hat <- numeric(length(n))
+se.hat <- numeric(length(n))
+
+for (i in 1:length(n)){
+  p <- numeric(m)  #存储 p-values
+  for (j in 1:m){
+    k <- n[i]
+    x <- rchisq(k,df = 1)
+    ttest <- t.test(x,alternative = "two.sided",mu = mu0,conf.level =1- alpha)
+    p[j] <- ttest$p.value
+}
+  p.hat[i] <- mean(p < alpha)
+  se.hat[i] <- sqrt(p.hat[i] * (1 - p.hat[i]) / m)
+}
+plot(n,p.hat/alpha)
+```
+
+(2)
+```
+rm(list=ls())
+m <- 1e4 ##实验次数
+n <- 1e3 ##每次实验的样本数
+alpha <- 0.05
+mu0 <- 1
+
+p <- numeric(m)  #存储 p-values
+for (j in 1:m){
+  x <- runif(n,0,2)
+  ttest <- t.test(x,alternative = "two.sided",mu = mu0,conf.level =1- alpha)
+  p[j] <- ttest$p.value
+}
+p.hat <- mean(p < alpha)
+se.hat <- sqrt(p.hat * (1 - p.hat) / m)
+print(c(p.hat, se.hat))
+```
+观察到的 t1e = 0.0476, 估计值的标准误差是 $\hat{se}(\hat{p}) = 0.0021$
+$t1e > \alpha$,但是在一个标准误差范围内，理论上讲,当$\mu =1$时,拒绝空假设的概率正好是 $\alpha$
+模拟从经验上调查，t.test中的p值计算方法是否与理论值$\alpha$相一致  
+(3)
+```
+rm(list=ls())
+m <- 1e4 ##实验次数
+n <- 1e3 ##每次实验的样本数
+alpha <- 0.05
+mu0 <- 1
+
+p <- numeric(m)  #存储 p-values
+for (j in 1:m){
+  x <- rexp(n,rate =1)
+  ttest <- t.test(x,alternative = "two.sided",mu = mu0,conf.level =1- alpha)
+  p[j] <- ttest$p.value
+}
+p.hat <- mean(p < alpha)
+se.hat <- sqrt(p.hat * (1 - p.hat) / m)
+print(c(p.hat, se.hat))
+```
+观察到的 t1e = 0.0557, 估计值的标准误差是 $\hat{se}(\hat{p}) = 0.00229$
+$t1e > \alpha$,但是在一个标准误差范围内，理论上讲,当$\mu =1$时,拒绝空假设的概率正好是 $\alpha$
+模拟从经验上调查，t.test中的p值计算方法是否与理论值$\alpha$相一致
+
+
+#### Supplement
+If we obtain the powers for two methods under a particular simulation setting with 10,000 experiments: say, 0.651 for one method and 0.676 for another method. We want to know if the powers are different at 0.05 level.  
+(1)What is the corresponding hypothesis test problem?  
+(2)What test should we use? Z-test, two-sample t-test, paired-t test or McNemar test? Why?  
+(3)Please provide the least necessary information for hypothesis testing.  
+
+
+解:检验的Power:$\pi(\theta)=1-\beta$是在知道参数真值为$\theta$时,拒绝$H_0$的概率,II型错误率是$1-\pi(\theta)$功效分析是在知道：显著性水平，功效，效应值，样本大小,三者中任意三个值，求另一个值  
+(1) $H_0: 方法1和方法2的power相同 \leftrightarrow H_{\alpha}:方法1和方法2的power不同 \neq 0$  
+(2) McNemar,用来比较两种方法是否有显著性差异
+$\tau_{\chi^2}=\frac{(|Power_1-Power_2|-1)^2}{Power_1+Power_2} \sim \chi_1^2$
+```{r}
+p1 <- 0.651
+p2 <- 0.676
+alpha <- 0.05
+tau <- (abs(p1-p2)-1)^2/(p1+p2)
+xi <- qchisq(1-alpha,df =1)
+print(c(tau,xi))
+```
+因此 0.7163715<3.8414588
+不能拒绝零假设
+(3)We need another information for hypothesis testing.
+  1)需要知道自由度为1的卡方分布的 $100(1-\alpha)\%$分位数 是3.8414
+
+
+
+
 
