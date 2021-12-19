@@ -784,5 +784,569 @@ paste("积分估计值 theta.hat = ",mean(f))
 
 ------------------------------------------------------------------------
 
+## The homework 3 2021-10-14
+
+### Question
+Exercises 6.5 and 6.A (page 180-181, Statistical Computating
+with R).
+
+### Answer
+#### 6.5
+Suppose a $95\%$ symmetric t-interval is applied to estimate a mean, but the sample data are non-normal. Then the probability that the confidence interval covers the mean is not necessarily equal to 0.95. Use a Monte Carlo experiment to estimate the coverage probability of the t-interval for random samples of $\chi^2_{2}$ data with sample size n = 20.  
+Compare your t-interval results with the simulation results in Example 6.4. (The t-interval should be more robust to departures from normality than the interval for variance.)
+
+解:  
+卡方分布密度
+$$
+\begin{align}
+\chi^2_n(x) &= \frac{1}{2^{n/2}\Gamma(n/2)} x^{n/2-1} e^{-x/2} ,\quad x>0 \\
+E[X]  & = n , \quad Var(X) = 2n \\
+Z_1 \sim \chi^2_{n1},&Z_2 \sim \chi^2_{n2} \Rightarrow Z_1+Z_2 \sim \chi^2_{n_1+n_2}
+\end{align}
+$$
+
+$$
+\begin{align}
+&if \quad X \sim N(0,1),Y_i \sim \chi_n^2 \quad and \quad X,Y_i \quad independent \\
+&\Rightarrow T=\frac{X}{\sqrt{Y_i/n}} \sim t_n \\
+&\Rightarrow  \sum_{i=1}^m Y_i \sim \chi_{m*n}^2 \\
+&\Rightarrow T=\frac{X}{\sqrt{\sum_{i=1}^m Y_i/(n*m)}} \sim t_{n*m} \\
+&\Rightarrow T=\frac{X}{\sqrt{\bar{Y}/n}} \sim t_{n*m} \\
+\end{align}
+$$
+
+$$
+\begin{align}
+x_1,x_2,...x_n \sim N(0,1) \\
+T = \frac{\bar{X}-\mu}{S_n/\sqrt{n}} \sim t_{n-1}
+\end{align}
+$$
+
+```{r}
+rm(list = ls())
+m <- 20
+n <- 2
+alpha <- 0.05
+Y <- rchisq(m,n)
+a<-t.test(Y,conf.level = 1-alpha)
+paste('均值的 95%t-interval:',a[4])
+UCL <- (m-1)*var(Y)/qchisq(alpha,df=m-1)
+paste('upper confidence limits UCL =',UCL)
+```
+```{r}
+rm(list= ls())
+m <- 20
+n <- 2
+alpha <- .05
+mu0 = n
+x <- rchisq(m, df = n)
+LCL <- mu0+var(x)*qt(alpha/2, df = m-1)/sqrt(m)
+UCL <- mu0+var(x)*qt(1-alpha/2, df = m-1)/sqrt(m)
+paste('均值的 95%t-interval:[',LCL,',',UCL,']')
+```
+MC实验 t-interval 包含了均值$\mu = 2$  
+A two sides $100(1−\alpha)\%$ confidence interval of variance is given by $\mu+\frac{S_n}{\sqrt{n}}t_{n-1}(\alpha/2),\mu+\frac{S_n}{\sqrt{n}}t_{n-1}(1-\alpha/2)$  
+
+#### 6.A
+Use Monte Carlo simulation to investigate whether the empirical Type I error rate of the t-test is approximately equal to the nominal significance level $\alpha$, when the sampled population is non-normal. The t-test is robust to mild departures from normality. Discuss the simulation results for the cases where the sampled population is 
+(i) $\chi^2_{1}$
+(ii) Uniform(0,2)
+(iii) Exponential(rate=1).   
+In each case, test $H_0 : \mu = \mu_0 \quad vs \quad H_1 : \mu \neq \mu_0$, where $\mu_0$ is the mean of $\chi^2_{1}$, Uniform(0,2), and Exponential(1), respectively.  
+解:
+单样本t检验，适用于样本均值与总体均值的比较，是检验样本均值所代表的的总体均值是否与理论值有差别
+
+I 型错误率是$H_0$正确，但是推翻$H_0$接受$H_1$的概率是$\alpha$
+$E[\chi_1^2] =  E[u(0,2)] =E[E(1))]= 1$  
+则检验问题变成 $H_0 : \mu = 1 \quad vs \quad H_1 : \mu \neq 1$
+$t1e = \frac{1}{m}\sum_{j=1}^m I(p_j \leq \alpha)$
+
+$T^* = \frac{\bar{X}-\mu_0}{S/\sqrt{n}} \sim t(n-1)$  
+(1) 
+
+```
+rm(list=ls())
+m <- 1e4 ##实验次数
+n <- 1e3 ##每次实验的样本数
+alpha <- 0.05
+mu0 <- 1
+
+p <- numeric(m)  #存储 p-values
+for (j in 1:m){
+  x <- rchisq(n,df = 1)
+  ttest <- t.test(x,alternative = "two.sided",mu = mu0,conf.level =1- alpha)
+  p[j] <- ttest$p.value
+}
+p.hat <- mean(p < alpha)
+se.hat <- sqrt(p.hat * (1 - p.hat) / m)
+print(c(p.hat, se.hat))
+```
+
+观察到的 t1e = 0.051, 估计值的标准误差是 $\hat{se}(\hat{p}) = 0.0022$
+$t1e > \alpha$,但是在一个标准误差范围内，理论上讲,当$\mu =1$时,拒绝空假设的概率正好是 $\alpha$
+模拟从经验上调查，t.test中的p值计算方法是否与理论值$\alpha$相一致  
+实验上发现，t1e和取的样本大小有关，越大和$\alpha$越接近，而越小，偏离越远
+
+```
+rm(list=ls())
+m <- 1e3 ##实验次数
+n <- c(1e1,1e2,5*1e2,1e3,5*1e3,1e4,2*1e4,3*1e4,4*1e4,5*1e4,6*1e4,1e5) ##每次实验的样本数
+alpha <- 0.05
+mu0 <- 1
+p.hat <- numeric(length(n))
+se.hat <- numeric(length(n))
+
+for (i in 1:length(n)){
+  p <- numeric(m)  #存储 p-values
+  for (j in 1:m){
+    k <- n[i]
+    x <- rchisq(k,df = 1)
+    ttest <- t.test(x,alternative = "two.sided",mu = mu0,conf.level =1- alpha)
+    p[j] <- ttest$p.value
+}
+  p.hat[i] <- mean(p < alpha)
+  se.hat[i] <- sqrt(p.hat[i] * (1 - p.hat[i]) / m)
+}
+plot(n,p.hat/alpha)
+```
+
+(2)
+```
+rm(list=ls())
+m <- 1e4 ##实验次数
+n <- 1e3 ##每次实验的样本数
+alpha <- 0.05
+mu0 <- 1
+
+p <- numeric(m)  #存储 p-values
+for (j in 1:m){
+  x <- runif(n,0,2)
+  ttest <- t.test(x,alternative = "two.sided",mu = mu0,conf.level =1- alpha)
+  p[j] <- ttest$p.value
+}
+p.hat <- mean(p < alpha)
+se.hat <- sqrt(p.hat * (1 - p.hat) / m)
+print(c(p.hat, se.hat))
+```
+观察到的 t1e = 0.0476, 估计值的标准误差是 $\hat{se}(\hat{p}) = 0.0021$
+$t1e > \alpha$,但是在一个标准误差范围内，理论上讲,当$\mu =1$时,拒绝空假设的概率正好是 $\alpha$
+模拟从经验上调查，t.test中的p值计算方法是否与理论值$\alpha$相一致  
+(3)
+```
+rm(list=ls())
+m <- 1e4 ##实验次数
+n <- 1e3 ##每次实验的样本数
+alpha <- 0.05
+mu0 <- 1
+
+p <- numeric(m)  #存储 p-values
+for (j in 1:m){
+  x <- rexp(n,rate =1)
+  ttest <- t.test(x,alternative = "two.sided",mu = mu0,conf.level =1- alpha)
+  p[j] <- ttest$p.value
+}
+p.hat <- mean(p < alpha)
+se.hat <- sqrt(p.hat * (1 - p.hat) / m)
+print(c(p.hat, se.hat))
+```
+观察到的 t1e = 0.0557, 估计值的标准误差是 $\hat{se}(\hat{p}) = 0.00229$
+$t1e > \alpha$,但是在一个标准误差范围内，理论上讲,当$\mu =1$时,拒绝空假设的概率正好是 $\alpha$
+模拟从经验上调查，t.test中的p值计算方法是否与理论值$\alpha$相一致
+
+#### Supplement
+If we obtain the powers for two methods under a particular simulation setting with 10,000 experiments: say, 0.651 for one method and 0.676 for another method. We want to know if the powers are different at 0.05 level.  
+(1)What is the corresponding hypothesis test problem?  
+(2)What test should we use? Z-test, two-sample t-test, paired-t test or McNemar test? Why?  
+(3)Please provide the least necessary information for hypothesis testing.  
 
 
+解:检验的Power:$\pi(\theta)=1-\beta$是在知道参数真值为$\theta$时,拒绝$H_0$的概率,II型错误率是$1-\pi(\theta)$功效分析是在知道：显著性水平，功效，效应值，样本大小,三者中任意三个值，求另一个值  
+(1) $H_0: 方法1和方法2的power相同 \leftrightarrow H_{\alpha}:方法1和方法2的power不同 \neq 0$  
+(2) McNemar,用来比较两种方法是否有显著性差异
+$\tau_{\chi^2}=\frac{(|Power_1-Power_2|-1)^2}{Power_1+Power_2} \sim \chi_1^2$
+
+```
+p1 <- 0.651
+p2 <- 0.676
+alpha <- 0.05
+tau <- (abs(p1-p2)-1)^2/(p1+p2)
+xi <- qchisq(1-alpha,df =1)
+print(c(tau,xi))
+```
+因此 0.7163715<3.8414588
+不能拒绝零假设
+(3)We need another information for hypothesis testing.
+  1)需要知道自由度为1的卡方分布的 $100(1-\alpha)\%$分位数 是3.8414
+
+
+------------------------------------------------------------------------
+## The homework 4 2021-10-21
+
+### Question
+Exercises 6.C (Statistical Computatingwith R).
+
+### Answer
+
+#### 6.C
+Repeat Examples $6.8$ and $6.10$ for Mardia's multivariate skewness test. Mardia [187] proposed tests of multivariate normality based on multivariate generalizations of skewness and kurtosis. If $X$ and $Y$ are iid, the multivariate population skewness $\beta_{1, d}$ is defined by Mardia as
+$$
+\begin{align}
+\beta_{1, d}=E\left[(X-\mu)^{T} \Sigma^{-1}(Y-\mu)\right]^{3}
+\end{align}
+$$
+
+Under normality, $\beta_{1, d}=0 .$ The multivariate skewness statistic is
+$$
+b_{1, d}=\frac{1}{n^{2}} \sum_{i, j=1}^{n}\left(\left(X_{i}-\bar{X}\right)^{T} \widehat{\Sigma}^{-1}\left(X_{j}-\bar{X}\right)\right)^{3}
+$$
+
+where $\hat{\Sigma}$ is the maximum likelihood estimator of covariance. Large values of $b_{1, d}$ are significant. The asymptotic distribution of $n b_{1, d} / 6$ is chisquared with $d(d+1)(d+2) / 6$ degrees of freedom.
+
+
+解:
+协方差矩阵的极大似然估计为
+$$
+\begin{align}
+设X_i是 d\times 1为向量,则 \quad\hat{\Sigma} = \frac{1}{n} \sum_{i=1}^n (X_i-\bar{X})(X_i-\bar{X})^{T}
+\end{align}
+$$
+
+
+```
+rm(list = ls())
+n <- c(10,20,30,50,100,500,1000,2000)
+d <- 3
+m<- 1000
+p.reject <- numeric(length(n))
+alpha <- 0.05
+likecov <- function(x) {
+  ##设 x 是 d*n的矩阵,d是维数,n是数据量
+  d1 <- nrow(x)
+  n1 <- ncol(x)
+  mu1 <- rowSums(x)/n1  ## 按照行均值
+  xx <- sweep(x,1,mu1)  #减去均值
+  return(xx%*%t(xx)/(n1))
+}
+msk <- function(x){
+  invsigma <- solve(likecov(x))
+  d2 <- nrow(x)
+  n2 <- ncol(x)
+  mu2 <- rowSums(x)/n2
+  xx <- sweep(x,1,mu2)
+  return( sum((t(xx)%*%invsigma%*%xx)^3)/(n2*n2))
+}
+gennormmatrx <- function(d3,n3){
+  # d多少维
+  # n多少个
+  y <- matrix(0,d3,n3)
+  for (i in 1:n3){
+    for (j in 1:d3){}
+    y[,i] = rnorm(d3)
+  }
+  return(y)
+}
+cv <- qchisq(1-alpha,df = d*(d+1)*(d+2)/6)
+sktests <- numeric(m)
+for (i in 1:length(n)){
+  sktests <- numeric(m)
+  for (j in 1:m){
+    x <- gennormmatrx(d,n[i])
+    # test decision is 1(reject) or 0
+    sktests[j] <- as.integer((n[i]*msk(x)/6)>=cv)
+  }
+  p.reject[i] <- mean(sktests)
+}
+results <- matrix(0,2,length(n))
+results[1,] = n
+results[2,] = p.reject
+rownames(results) = c("n","estimate")
+colnames(results) = c(1:length(n))
+results
+```
+
+------------------------------------------------------------------------
+## The homework 5 2021-10-28
+
+### Question
+
+Exercises 7.7, 7.8, 7.9, and 7.B (pages 213, Statistical Computating with R)
+
+
+### Answer
+
+#### 7.7
+
+Refer to Exercise 7.6. Efron and Tibshirani discuss the following example [84, Ch. 7]. The five-dimensional scores data have a $5 \times 5$ covariance matrix $\Sigma$, with positive eigenvalues $\lambda_{1}>\cdots>\lambda_{5} .$ In principal components analysis,
+$$
+\theta=\frac{\lambda_{1}}{\sum_{j=1}^{5} \lambda_{j}}
+$$
+measures the proportion of variance explained by the first principal component. Let $\hat{\lambda}_{1}>\cdots>\hat{\lambda}_{5}$ be the eigenvalues of $\hat{\Sigma}$, where $\hat{\Sigma}$ is the $\mathrm{MLE}$ of $\Sigma$. Compute the sample estimate
+$$
+\hat{\theta}=\frac{\hat{\lambda}_{1}}{\sum_{j=1}^{5} \hat{\lambda}_{j}}
+$$ 
+of $\theta$. Use bootstrap to estimate the bias and standard error of $\hat{\theta}$.
+
+#### Solution
+```
+rm(list = ls())
+library(knitr)
+library(bootstrap) #for the law data
+
+score <- matrix(0,length(scor$mec),5)  # 88*5
+score[,1] <- scor$mec
+score[,2] <- scor$vec
+score[,3] <- scor$alg
+score[,4] <- scor$ana
+score[,5] <- scor$sta
+
+n <- length(scor$mec)
+xigma.hat <- cov(score)
+xigma.ev <-eigen(xigma.hat)
+xigma.lambda <- xigma.ev$values
+theta.hat <- xigma.lambda[1]/sum(xigma.lambda)
+
+B <- 5000
+theta.b <-numeric(B)
+for (b in 1:B){
+  i<- sample(1:n,size = n,replace = TRUE)
+  xigma0.hat <- cov(score[i,])
+  xigma0.ev <- eigen(xigma0.hat)
+  xigma0.lambda <- xigma0.ev$values
+  theta.b[b] <- xigma0.lambda[1]/sum(xigma0.lambda)
+}
+bias <- mean(theta.b)-theta.hat
+se.theta <- B/(B-1)*var(theta.b)
+boot.theta.hat <- mean(theta.b)
+standard.error <- sqrt(se.theta)
+
+result <- cbind(theta.hat, boot.theta.hat, bias,standard.error)#合并计算结果
+dimnames(result)[[2]] <- c("theta", "Bootstrap theta.hat", "bias", "standard error")#重命名各列
+kable(result, caption = "表1：用bootstrap估计theta.hat的bias和standard error") #利用kable绘制计算结
+```
+
+#### 7.8
+
+Refer to Exercise 7.7. Obtain the jackknife estimates of bias and standard error of $\hat{\theta}$.
+
+#### Solution
+```
+rm(list = ls())
+library(bootstrap) #for the law data
+library(knitr)
+
+score <- matrix(0,length(scor$mec),5)  # 88*5
+score[,1] <- scor$mec
+score[,2] <- scor$vec
+score[,3] <- scor$alg
+score[,4] <- scor$ana
+score[,5] <- scor$sta
+
+n <- length(scor$mec)
+xigma.hat <- cov(score)
+xigma.ev <-eigen(xigma.hat)
+xigma.lambda <- xigma.ev$values
+theta.hat <- xigma.lambda[1]/sum(xigma.lambda)
+
+theta.jack <-numeric(n)
+
+for (i in 1:n){
+  xigma0.hat <- cov(score[-i,])  #Jackknife
+  xigma0.ev <- eigen(xigma0.hat)
+  xigma0.lambda <- xigma0.ev$values
+  theta.jack[i] <- xigma0.lambda[1]/sum(xigma0.lambda)
+}
+bias.jack <- (n-1)*(mean(theta.jack)-theta.hat)
+bias.se <- sqrt((n-1)*mean(theta.jack-mean(theta.jack))^2)
+
+
+jack.theta.hat <- mean(theta.jack)
+standard.error <- sd(theta.jack)
+
+result <- cbind(theta.hat, jack.theta.hat, bias.jack,standard.error)#合并计算结果
+dimnames(result)[[2]] <- c("theta", "Jackknife theta.hat", "bias", "standard error")#重命名各列
+kable(result, caption = "表2：用Jackknife估计theta.hat的bias和standard error") #利用kable绘制计算结
+```
+
+
+
+
+#### 7.9
+
+Refer to Exercise 7.7. Compute 95% percentile and BCa confidence intervals for $\hat{\theta}$. 
+#### Solution
+```
+rm(list = ls())
+library(knitr)
+library(bootstrap) #for the law data
+level <- 0.95
+
+boot.se <- function(X,R,f){
+  #local function to compute the bootstrap
+  #estimate of standard error for statistic f(x)
+  x <- as.matrix(x); m <- nrow(x)
+  th <- replicate(R, expr = {
+  i <- sample(1:m, size = m, replace = TRUE)
+  f(x[i, ])
+  })
+  return(sd(th))
+}
+
+score <- matrix(0,length(scor$mec),5)  # 88*5
+score[,1] <- scor$mec
+score[,2] <- scor$vec
+score[,3] <- scor$alg
+score[,4] <- scor$ana
+score[,5] <- scor$sta
+
+n <- length(scor$mec)
+xigma.hat <- cov(score)
+xigma.ev <-eigen(xigma.hat)
+xigma.lambda <- xigma.ev$values
+theta.hat <- xigma.lambda[1]/sum(xigma.lambda)
+
+B <- 5000  #计算bootstrp的次数
+R <- 100 ##计算标准差的次数
+theta.b <-numeric(B)
+se <- numeric(B)
+
+statistic <-function(x){
+  xigma0.hat <- cov(x)
+  xigma0.ev <- eigen(xigma0.hat)
+  xigma0.lambda <- xigma0.ev$values
+  return(xigma0.lambda[1]/sum(xigma0.lambda)) 
+}
+
+for (b in 1:B){
+  i<- sample(1:n,size = n,replace = TRUE)
+  boostrapscore <- score[i,]
+  xigma0.hat <- cov(boostrapscore)
+  
+  th <- replicate(R,expr={
+    j<- sample(1:n,size = n,replace = TRUE)
+    statistic(boostrapscore[j,])
+  })
+  xigma0.ev <- eigen(xigma0.hat)
+  xigma0.lambda <- xigma0.ev$values
+  theta.b[b] <- xigma0.lambda[1]/sum(xigma0.lambda)
+  se[b] <- sd(th)
+}
+
+
+bias <- mean(theta.b)-theta.hat
+se.theta <- B/(B-1)*var(theta.b)
+boot.theta.hat <- mean(theta.b)
+standard.error <- sqrt(se.theta)
+
+stat0 <- statistic(score)
+stat <- theta.b
+se0 <- sd(stat)
+t.stats <- (stat-stat0)/se
+alpha <- 1-level
+
+Qt <- quantile(t.stats,c(alpha/2,1-alpha/2),type=1)
+names(Qt) <- rev(names(Qt))
+CI <- rev(stat0-Qt*se0)
+CI
+```
+
+
+
+#### 7.B
+
+Repeat Project 7.A for the sample skewness statistic. Compare the coverage rates for normal populations (skewness 0) and $\chi^2_5$ distributions (positive skewness).
+
+#### Solution
+
+```
+rm(list = ls())
+n <- 1000  #样本数量
+alpha <- 0.05
+B <- 200  #bootstrap 次数
+
+sk <- function(xs) {
+  
+  # 计算统计值
+  sample.skewness <- function (sample) {
+    mu <- mean(sample)
+    n <- length(sample)
+    num <- 1/n * sum(sapply(sample, function (x) (x - mu)^3))
+    denom <- sd(sample)^3
+    return (num/denom)
+  }
+  
+  theta.hat <- sample.skewness(xs)
+  
+  
+  theta.hat.b <- numeric(B)
+  
+  for (b in 1:B) {
+    i <- sample(1:n, n, TRUE)
+    xs.b <- xs[i]
+    theta.hat.b[b] <- sample.skewness(xs.b)
+  }
+  
+  sd.hat <- sd(theta.hat.b)
+  
+  # 可视化
+  par(mfrow = c(1, 1))
+  hist(theta.hat.b)
+  
+  # 置信区间
+  
+  probs <- c(alpha/2, 1-alpha/2)
+  names <- sapply(probs, function(p) paste(p*100, '%', sep <- ''))
+  qs.theta.hat.b <- quantile(theta.hat.b, probs)
+  
+  # 标准正态区间
+  qs.norm <- qnorm(probs)
+  ci.norm <- rev(theta.hat - qs.norm * sd.hat)
+  
+  # 基本 bootstrap区间
+  ci.basic <- rev(2*theta.hat - qs.theta.hat.b)
+  
+  # percentile.
+  ci.percentile <- qs.theta.hat.b
+  
+  ci.data <- data.frame(rbind(ci.norm, ci.basic, ci.percentile))
+  colnames(ci.data) <- names
+  ci.data['left.miss'] <- 0
+  ci.data['right.miss'] <- 0
+  
+  # MC study.
+  rep <- 1000
+  
+  for (r in 1:rep) {
+    i <- sample(1:n, n, replace = TRUE)
+    skew <- sample.skewness(xs[i])
+    for (y in 1:nrow(ci.data)) {
+      lower <- ci.data[y,names[1]]
+      upper <- ci.data[y,names[2]]
+      if (skew < lower) {
+        ci.data[y,'left.miss'] <- ci.data[y,'left.miss'] + 1
+      } else if (skew > upper) {
+        ci.data[y,'right.miss'] <- ci.data[y,'right.miss'] + 1
+      }
+    }
+  }
+  
+  ci.data$left.miss <- ci.data$left.miss/rep
+  ci.data$right.miss <- ci.data$right.miss/rep
+  
+  return(ci.data)
+}
+
+df <- 5
+x1 <- rchisq(n, df = df)
+sk(x1)
+
+sd <- sd(x1)
+mux <- mean(x1)
+x2 <- rnorm(n, mean = mux, sd = sd)
+
+sk(x2)
+
+```
+
+
+
+------------------------------------------------------------------------
