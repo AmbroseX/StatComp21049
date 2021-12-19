@@ -1347,6 +1347,886 @@ sk(x2)
 
 ```
 
+------------------------------------------------------------------------
+## The homework 6 2021-11-04
+
+### Question
+
+Exercise 8.2 (page 242, Statistical Computating with R).
+
+### Answer
+
+#### 8.2
+
+Implement the bivariate Spearman rank correlation test for independence
+[255] as a permutation test. The Spearman rank correlation test
+statistic can be obtained from function cor with method = "spearman".
+Compare the achieved significance level of the permutation test with the
+p-value reported by cor.test on the same samples.
+
+#### Solution
+
+```
+rm(list=ls())
+library(knitr)
+
+set.seed(1355)
+
+m1 <- 1000
+m2 <- 1000
+set.seed(9999)
+x <- rnorm(m1,1,10)
+y <- rchisq(m2,2)
+
+R <- 999
+z <- c(x,y)
+K <- 1:(m1+m2)
+reps <- numeric(R)
+
+c0 <- cor(x,y,method = "spearman")  #统计量
+
+for (i in 1:R){
+  k <- sample(K,size = m1,replace = FALSE)
+  x1 <- z[k]
+  y1 <- z[-k]
+  reps[i] <- cor(x1,y1,method = "spearman")
+}
+
+p <- mean(c(c0,reps)>=c0)
+
+cat("boot p = ",p)
+
+cor.test(x,y,method = "spearman")
+
+```
+
+发现的p-value=0.446>0.05,因此在显著性水平$1-\alpha$情况下应该拒绝$H_0$，即x和y是不相关的
+
+从cor.test也得出相同的结论，相关性都非常低
+
+#### Supplement
+
+Design experiments for evaluating the performance of the NN, energy, and
+ball methods in various situations.
+
+(1) Unequal variances and equal expectations
+
+(2) Unequal variances and unequal expectations
+
+(3) Non-normal distributions: t distribution with 1 df (heavy-tailed
+    distribution), bimodel distribution (mixture of two normal
+    distributions)
+
+(4) Unbalanced samples (say, 1 case versus 10 controls)
+
+Note: The parameters should be chosen such that the powers are 2 (say,
+range from 0.3 to 0.8).
+
+```
+#计算NN的p-value
+library(boot)
+library(FNN)
+library(energy)
+library(Ball)
+Tn3 <- function(z, ix, sizes) {
+  n1 <- sizes[1]
+  n2 <- sizes[2]
+  n <- n1 + n2
+  z <- z[ix, ]
+  o <- rep(0, NROW(z))
+  z <- as.data.frame(cbind(z, o))
+  NN <- get.knn(z, k=3)
+  block1 <- NN$nn.index[1:n1, ]
+  block2 <- NN$nn.index[(n1+1):n, ]
+  i1 <- sum(block1 < n1 + .5)
+  i2 <- sum(block2 > n1 + .5)
+  return((i1 + i2) / (3 * n))
+}
+
+## 使用NNp(x,y)可以直接得出p-value
+NNp <- function(x,y){
+  z <- c(x,y)
+  o <- rep(0, NROW(z))
+  z <- as.data.frame(cbind(z, o))
+  N <- c(length(x),length(y))
+  boot.obj <- boot(data =z ,statistic = Tn3,
+                 sim="permutation", R=999,sizes =N)
+  #boot.obj
+  tb <- c(boot.obj$t,boot.obj$t0)
+  return(mean(tb>=boot.obj$t0))
+}
+
+# Energy的p-value
+
+Energy <- function(x,y){
+  m1 <- length(x)
+  m2 <- length(y)
+  z <- rbind(x, y)
+  d <- dist(z)
+  obj <- eqdist.etest(d, sizes=c(1, 1), distance=TRUE, R = m1+m2-1)
+  return(obj$p.value)
+}
+  
+Ballmethod <- function(x,y){
+  #输入的x,y维度要相等
+  m1 <- length(x)
+  m2 <- length(y)
+  if (m1!=m2){
+    return("维度不一样")
+  }
+  else{
+    obj <-bcov.test(x,y,method = "permutation")
+    return(obj$p.value)
+  }
+}
+
+# ball methods 的p-value
+```
+(1) 
+$用指数分布E[x] = 1/\lambda ,Var[x] =1/\lambda\^2正态分布 E[y]=1/\lambda,Var[y] = \sigma\^2$
+
+```
+set.seed(12345)
+n <- 200
+x <- rnorm(n,2,4)
+y <- rnorm(n,2,8)
+
+# NN 检验方法
+NNp(x,y)
+## Energy 检验方法
+Energy(x,y)
+## Ball 检验方法
+Ballmethod(x,y)
+```
+结果三者的p-value很小,都小于0.05,分布相等的假设被拒绝
+
+(2)使用正态分布来检验
+```
+n <- 200
+x <- rnorm(n,2,4)
+y <- rnorm(n,4,8)
+
+# NN 检验方法
+NNp(x,y)
+## Energy 检验方法
+Energy(x,y)
+## Ball 检验方法
+Ballmethod(x,y)
+  
+```
+(3) t分布
+```
+set.seed(1231)
+n <- 1000
+x <- rt(n,df =1)
+
+# p*N(0,1)+(1-p)*N(0,3)
+p <- 0.3
+y <- numeric(n)
+for(i in 1:n){
+  if (runif(1)<p){
+    y[i] <- rnorm(1,0,1)
+  }
+  else{
+    y[i] <- rnorm(1,0,3)
+  }
+}
+
+# NN 检验方法
+NNp(x,y)
+## Energy 检验方法
+Energy(x,y)
+## Ball 检验方法
+Ballmethod(x,y)
+
+```
+三种方法的$p-value$都很小,小于0.05，因此分布相等的假设被拒绝
+
+(4)
+```
+set.seed(12345)
+n1 <- 200
+n2 <- n1*10
+x <- rnorm(n1,2,4)
+y <- rnorm(n2,2,8)
+
+# NN 检验方法
+NNp(x,y)
+## Energy 检验方法
+Energy(x,y)
+## Ball 检验方法
+Ballmethod(x,y)
+```
+前两种方法的$p-value$都很小,小于0.05，因此分布相等的假设被拒绝
+
+------------------------------------------------------------------------
+## The homework 7 2021-11-11
+
+### Question
+Exercies 9.3 and 9.8 (pages 277-278, Statistical Computating
+with R)
+
+
+### Answer
+
+#### 9.3
+Use the Metropolis-Hastings sampler to generate random variables from a standard Cauchy distribution. Discard the first 1000 of the chain, and compare the deciles of the generated observations with the deciles of the standard Cauchy distribution (see qcauchy or qt with df=1). Recall that a $Cauchy(θ, η)$ distribution has density function
+$$
+f(x) = \frac{1}{\theta\pi(1+[(x-\eta)/\theta]^2)}, -\infty<x<\infty,\theta>0
+$$
+#### Solution
+
+```
+rm(list = ls())
+library(knitr)
+# Causcht(theta,eta)
+set.seed(1145140)
+
+Gelman.Rubin <- function(psi) {
+  # psi[i,j] 是 检验函数 psi(X[i,1:j])的值
+  # X的第i行为第i条链
+  psi <- as.matrix(psi)
+  n <- ncol(psi)
+  k <- nrow(psi)
+  psi.means <- rowMeans(psi) #所有行的平均值，链之间的平均
+  B <- n * var(psi.means) # 链之间的方差估计
+  psi.w <- apply(psi, 1, "var") #within variances
+  W <- mean(psi.w) #within est.
+  v.hat <- W*(n-1)/n + (B/n) #upper variance est.
+  r.hat <- v.hat / W #G-R statistic
+  return(r.hat)
+}
+
+normal.chain<-function(N,theta,eta,X1){
+  x <- numeric(N)
+  x[1] <- X1
+  k <- 0
+  u <- runif(N)
+  for (i in 2:N) {
+  xt <- x[i-1]
+  y <- rnorm(1, xt)
+  shang <- df(y,theta=theta, eta=eta) * dnorm(xt, y)
+  xia <- df(xt, theta=theta, eta=eta) * dnorm(y, xt)
+  if (u[i] <= shang/xia) x[i] <- y 
+  
+  else {
+    x[i] <- xt
+    k <- k+1 #y 被拒绝
+    }
+  }
+  return(x)
+}
+
+
+df <- function(x,theta,eta) {
+  stopifnot(theta > 0)
+  return(1 /(theta*pi*(1+((x-eta)/theta)^2) ))
+}
+
+m <- 10000  #样本长度
+b <- 1000 #去掉的长度
+theta <- 1
+eta <- 0
+burn <- 1000
+
+
+x0 <- c(-10,-5,1,2,5,10,15,20)  #设置初始值
+K <- length(x0)
+
+#产生链
+X <- matrix(0,nrow = K,ncol=m)
+for (i in 1:K){
+  X[i,] <- normal.chain(m,theta,eta,x0[i])
+  
+}
+
+
+index <- burn+1:m
+# 选择第3条链来进行绘图
+xx <- X[3,]
+y1 <- xx[index]  #产生的MCMC
+
+y2 <- rcauchy(length(y1), location = 0, scale = 1)  #cauchy产生的
+par(mfrow = c(1,2))
+plot(index, y1,type="l",main="去掉前面1000个样本后的M-H链", ylab="X")
+hist(y1, probability = TRUE, breaks = 100,main="密度分布图",xlab="X")
+
+plot.y1 <- seq(min(xx), max(xx), 0.01)
+lines(plot.y1, df(plot.y1,theta=theta, eta=eta),main="密度分布图",xlab="X")
+par(mfrow = c(1,1))
+
+#psi <- t(apply(X, 1, cumsum))
+#for (i in 1:nrow(psi)) psi[i,] <- psi[i,] / (1:ncol(psi))
+
+paste("R=",Gelman.Rubin(X))
+
+
+rhat <- rep(0, m)
+for (j in (b+1):m){
+  rhat[j] <- Gelman.Rubin(X[,1:j])
+}
+plot(rhat[(b+1):m], main = bquote(R),type="l", xlab="", ylab="R")
+abline(h=1.1, lty=2)
+
+## 计算分位数
+
+qmh <- c(1:K)
+qcau <- c(1:K)
+for (i in 1:K){
+  qmh[i] <- quantile(X[i,],c(0.1))
+  qcau[i] <- qcauchy(0.1, 0,1)
+}
+result <- cbind(qmh,qcau)  #合并计算结果
+dimnames(result)[[2]] <- c("M-H 10%分位数", "标准柯西10%分位数") #重命名各列
+kable(result, caption = "分位数对比")
+
+```
+
+可以看出产生的分布和实际分布拟合的很好
+
+#### 9.8
+This example appears in [40]. Consider the bivariate density
+$$
+f(x,y) \propto \left( \begin{array}{c} n \\ x \end{array} \right) y^{x+a-1}(1-y)^{n-x+b-1} , x=0,1,...,n, 0\leq y\leq 1
+$$
+It can be shown (see e.g. [23]) that for fixed a, b, n, the conditional distributions are $Binomial(n, y)$ and $Beta(x+ a, n−x+ b)$. Use the Gibbs sampler to generate a chain with target joint density $f(x, y)$
+
+#### Solution
+$$
+f(X|Y) = Binomial(n,y) = \left( \begin{array}{c} n \\ x \end{array} \right) y^{x}(1-y)^{n-x} \\
+E[X|Y] =  ny  \\
+f(Y|X) = Beta(x+a,n-x+b) = \frac{\Gamma(a+n+b)}{\Gamma(x+a)\Gamma(n-x+b)}y^{x+a-1}(1-y)^{n-x+b-1} \\
+E[Y|X] = \frac{x+a}{n+a+b}\\
+$$
+```
+N <- 5000 #链的长度
+burn <- 1000 #burn-in length
+
+###### Mode Parameter #####
+n <- 50
+a <- 1
+b <- 2
+
+###### 产生链的函数 #####
+bivariate.chain <- function(N,n,a,b,X1,Y1){
+  # N个数据点 参数 n,a,b,初值 X1,Y1
+  data <- list(X = matrix(0,1,N),Y=matrix(0,1,N)) #the chain, a bivariate sample
+  data$X[1] <- X1
+  data$Y[1] <- Y1
+  for ( i in 2:N){
+    x2 <- data$Y[i-1]
+    data$X[i] <- rbinom(1, n, x2)
+    x1 <- data$X[i]
+    data$Y[i] <- rbeta(1,x1+a,n-x1+b)
+  }
+  return(data)
+}
+
+
+
+#每条链的初始值
+x0 <- c(1,5,10,15,20,50,100)
+y0 <- c(0.01,0.05,0.1,0.2,0.5,0.7,0.9)
+K <- length(x0)  #几条链
+
+#产生链
+X <- matrix(0,K,N)
+Y <- matrix(0,K,N)
+for (i in 1:K){
+  data <- bivariate.chain(N,n,a,b,x0[i],y0[i])
+  X[i,] <- data$X
+  Y[i,] <- data$Y
+}
+
+
+
+bs <- burn+1
+index <- (burn+1):N
+x <- X[1,index]
+y <- Y[1,index]
+
+
+plot(t(rbind(x,y)), main="联合密度分布图", cex=.5, xlab="X",ylab="Y", ylim=range(y))
+
+#产生的MCMC
+
+par(mfrow = c(1,2))
+plot(index, x,type="l",main="X的去掉前面1000个样本后的Gibbs链", ylab="X")
+hist(x, probability = TRUE, breaks = 100,main="密度分布图",xlab="X")
+par(mfrow = c(1,1))
+
+par(mfrow = c(1,2))
+plot(index, y,type="l",main="Y的去掉前面1000个样本后的Gibbs链", ylab="Y")
+hist(y, probability = TRUE, breaks = 100,main="密度分布图",xlab="Y")
+par(mfrow = c(1,1))
+paste("Rx=",Gelman.Rubin(X))
+paste("Ry=",Gelman.Rubin(Y))
+
+#plot the sequence of R-hat statistics
+rhat <- rep(0, N)
+for (j in (b+1):N){
+  rhat[j] <- Gelman.Rubin(X[,1:j])
+}
+plot(rhat[bs:N], type="l", xlab="", ylab="R")
+abline(h=1.1, lty=2)
+
+
+rhat <- rep(0, N)
+for (j in (b+1):N){
+  rhat[j] <- Gelman.Rubin(Y[,1:j])
+}
+plot(rhat[bs:N], type="l", xlab="", ylab="R")
+abline(h=1.1, lty=2)
+
+```
+#### Supplement
+For each of the above exercise, use the Gelman-Rubin method to monitor convergence of the chain, and run the chain until it converges approximately to the target distribution according to $\hat{R} < 1.2$
+
+#### Solution
+
+$\hat{R}$的图已经在上面画出来了，都是小于1.2
 
 
 ------------------------------------------------------------------------
+## The homework 8   2021-11-18
+
+### Question
+
+Exercises 11.3 and 11.5 (pages 353-354, Statistical Computing with R)
+
+
+### Answer
+
+#### 11.3
+
+(a) Write a function to compute the $k^{t h}$ term in
+$$
+    \sum_{k=0}^{\infty} \frac{(-1)^{k}}{k ! 2^{k}} \frac{\|a\|^{2 k+2}}{(2 k+1)(2 k+2)} \frac{\Gamma\left(\frac{d+1}{2}\right) \Gamma\left(k+\frac{3}{2}\right)}{\Gamma\left(k+\frac{d}{2}+1\right)}
+$$
+where $d \geq 1$ is an integer, $a$ is a vector in $\mathbb{R}^{d}$, and $\|\cdot\|$ denotes the Euclidean norm. Perform the arithmetic so that the coefficients can be computed for (almost) arbitrarily large $k$ and $d$. (This sum converges for all $a \in \mathbb{R}^{d}$ ).
+(b) Modify the function so that it computes and returns the sum.
+(c) Evaluate the sum when $a=(1,2)^{T}$.
+
+$$
+取对数：\\
+(2k+2)ln(\mid\mid a\mid\mid)+ lgamma(\frac{d+1}{2})+lgamma(k+3/2)-lgamma(k+d/2+1)-\\ln(k!)-kln(2)-ln(2k+1)-ln(2k+2)
+$$
+
+```{r}
+#计算欧氏距离
+Eucdidean <- function(x){
+    return(sqrt(sum(x*x)))
+}
+
+#计算第k项
+fk <- function(a,d,k){
+  lgfk <- (2*k+2)*log(Eucdidean(a))+lgamma((d+1)/2)+lgamma(k+3/2)-lgamma(k+d/2+1)-log(factorial(k))-k*log(2)-log(2*k+1)-log(2*k+2)
+  return((-1)^k *exp(lgfk))
+}
+
+#计算求和
+compute.Sum <- function(Fun,i,j,a1,d1){
+  #计算函数f的第i到j项
+  if(i>j){
+    paste("范围不对")
+  }
+  else{
+    s <- 0
+    for (r in i:j){
+      s<- s+Fun(a1,d1,r)
+    }
+  }
+  return(s)
+}
+
+a <- c(1,2)
+d <- 10
+
+#计算前100项
+compute.Sum(fk,1,100,a,d)
+#计算前1000项
+compute.Sum(fk,1,1000,a,d)
+```
+
+#### 11.5
+
+求方程的根
+
+$$
+\begin{gathered}
+\frac{2 \Gamma\left(\frac{k}{2}\right)}{\sqrt{\pi(k-1)} \Gamma\left(\frac{k-1}{2}\right)} \int_{0}^{c_{k-1}}\left(1+\frac{u^{2}}{k-1}\right)^{-k / 2} d u \\
+=\frac{2 \Gamma\left(\frac{k+1}{2}\right)}{\sqrt{\pi k} \Gamma\left(\frac{k}{2}\right)} \int_{0}^{c_{k}}\left(1+\frac{u^{2}}{k}\right)^{-(k+1) / 2} d u
+\end{gathered}
+$$
+for $a$, where
+$$
+c_{k}=\sqrt{\frac{a^{2} k}{k+1-a^{2}}}
+$$
+Compare the solutions with the points $A(k)$ in Exercise $11.4 .$
+
+```
+rm(list = ls())
+library(knitr)
+
+#ck积分上限
+ck <- function(a1,k){
+  if (a1*a1>k+1){
+    paste("a太大了!")
+  }
+  else{
+    return(sqrt((a1^2*k)/(k+1-a1*a1)))
+  }
+}
+
+#被积函数
+fu <- function(u,k){
+  (1+u*u/k)^(-(k+1)/2)
+}
+
+
+#传入ck函数
+fk <- function(Fun1,Fun2,a1,k1){
+  #Fun1是 被积函数,Fun2是上界ck 
+  coefk <- 2/sqrt(pi*k1)*exp(lgamma((k1+1)/2)-lgamma(k1/2)) #前面系数部分
+  res <- integrate(Fun1,lower = 0,upper=Fun2(a1,k1),rel.tol = .Machine$double.eps^0.15,k = k1) #积分部分
+  return(coefk*res$value)
+}
+
+#k和k-1项相减
+dffk <- function(a2,k1){
+  return(fk(fu,ck,a2,k1)-fk(fu,ck,a2,k1-1))
+}
+
+#找根
+findroot <- function(k1){
+  m <- 1000 #产生多少个点
+  #先只在正数部分找，因为是偶函数
+  a <- seq(-sqrt(k1),sqrt(k1),length.out = m)
+  m <- length(a)
+  jifen <- numeric(m)
+  for (i in 1:m){
+    jifen[i]<- dffk(a[i],k1)
+  }
+  
+  #找零点的区域,有多个零点
+  lowerbound <- 0-.Machine$double.eps^0.25
+  upperbound <- 0+.Machine$double.eps^0.25
+  for (i in 2:m){
+    if (jifen[i]*jifen[i-1]<0){
+      lowerbound <- c(lowerbound,a[i-1])
+      upperbound <- c(upperbound,a[i])
+    }
+  }
+  #绘制函数
+  plot(a,jifen,main = paste("k=",k1,"时"),xlab = "a",ylab = "f(k)-f(k-1)",type="l",xlim = c(min(lowerbound),max(upperbound)))
+  
+  fkroot <- list(root = numeric(length(lowerbound)),f.root = numeric(length(lowerbound)))
+  for ( i in 2:length(lowerbound)){
+    res <-uniroot(dffk,lower=lowerbound[i],upper = upperbound[i],tol=.Machine$double.eps^0.15,k=k1)
+    fkroot$root[i] <- res$root
+    fkroot$f.root[i] <- res$f.root
+  }
+  result <- cbind(fkroot$root, fkroot$f.root)  #合并计算结果
+  dimnames(result)[[2]] <- c("root", "f.toot") #重命名各列
+  print(kable(result, caption = paste("k=",k1,"时","有",length(lowerbound),"个根")))
+  #return(fkroot)
+}
+```
+
+```
+for (i in 4:25){
+  findroot(i)
+}
+findroot(100)
+findroot(500)
+findroot(1000)
+```
+
+#### Supplement
+
+Suppose $T_{1}, \ldots, T_{n}$ are i.i.d. samples drawn from the exponential distribution with expectation $\lambda$. Those values greater than $\tau$ are not observed due to right censorship, so that the observed values are $Y_{i}=T_{i} I\left(T_{i} \leq \tau\right)+\tau I\left(T_{i}>\tau\right)$, $i=1, \ldots, n$. Suppose $\tau=1$ and the observed $Y_{i}$ values are as follows:
+$$
+0.54,0.48,0.33,0.43,1.00,1.00,0.91,1.00,0.21,0.85
+$$
+Use the E-M algorithm to estimate $\lambda$, compare your result with the observed data MLE (note: $Y_{i}$ follows a mixture distribution).
+
+
+$$
+指数分布:f(x;\lambda) = \frac{1}{\lambda} e^{-\frac{x}{\lambda}}, x,\lambda>0 \\
+P(X \leq x;\lambda)= F(x;\lambda) = 1-e^{-\frac{ x}{\lambda}}, x,\lambda>0 \\
+则P(X> x;\lambda) = e^{-\frac{x}{\lambda}}, x,\lambda>0 \\
+E[x] = \lambda,Var[x] = \lambda^2 \\
+寿命分布的无记忆性:\\
+P(X>x|X\geq t) = P(X>x-t)I(x\geq t) = e^{-\frac{(x-t)}{\lambda}}I(x\geq t)\\
+f(x|X\geq t) = \frac{1}{\lambda} e^{-\frac{(x-t)}{\lambda}}I(x\geq t)\\
+P(X>x|X<t) = 1-\frac{F(x;\lambda)}{F(t;\lambda)}=\frac{e^{-\frac{x}{\lambda}}-e^{-\frac{t}{\lambda}}}{1-e^{-\frac{t}{\lambda}}}, \quad 0\leq x\leq t\\
+f(x|X<t) = \frac{1}{\lambda} e^{-\frac{x}{\lambda}}I(x<t)
+$$
+
+将观察数据分为两部分
+
+观测数据$T=\{0.54,0.48,0.33,0.43,0.91,0.21,0.85 \},E=\{E_1,...,E_m\}=\{1,1,1\}$
+
+$E_i =1$代表$z_i>\tau$
+
+隐藏数据$E=\{z_1,z_2,z_3\}$
+
+观测数据的先验分布
+
+$$
+\begin{align}
+L(Y|\lambda) & = \prod_{j=1}^n \frac{1}{\lambda} e^{-\frac{T_j}{\lambda}}\prod_{k=1}^m P(E_k;\lambda)  \\
+&=\frac{1}{\lambda^n}   e^{-\frac{\sum_{j=1}^nT_j}{\lambda}}\prod_{k=1}^m P(E_k;\lambda) \\
+参数的先验分布为&无信息先验,\pi(\lambda) = 1 \\
+则后验分布为 L(\lambda|Y) &=\frac{1}{\lambda^n}   e^{-\frac{\sum_{j=1}^n T_j}{\lambda}}\prod_{k=1}^m P(E_k;\lambda)   \\
+对数先验为\\
+l(\lambda|Y) & \propto -\frac{\sum_{j=1}^n T_j}{\lambda}-nln(\lambda)+\sum_{j=1}^{m} ln(P(E_k;\lambda))\\
+& \propto -\frac{\sum_{j=1}^n T_j}{\lambda}-nln(\lambda)+\sum_{j=1}^{m} ln(\int _z P(E_k,z;\lambda)dz)\\
+\end{align}
+$$
+
+$$
+\begin{align}
+Q(\lambda,\lambda^{(i)} ) &= -\frac{\sum_{j=1}^n T_j}{\lambda}-nln(\lambda)+\sum_{j=1}^{m} \int_z P(z|E_k;\lambda^{(i)})ln( P(E_k|z;\lambda)P(z;\lambda))dz\\
+& = -\frac{\sum_{j=1}^n T_j}{\lambda}-nln(\lambda)+  \sum_{k=1}^{m} \int_{z} \frac{P(z,E_k;\lambda^{(i)})}{P(E_k;\lambda^{(i)})} ln (  P(E_k|z;\lambda))P(z;\lambda)) dz\\
+& = -\frac{\sum_{j=1}^n T_j}{\lambda}-nln(\lambda)+  \sum_{k=1}^{m} \int_{z} \frac{P(E_k|z;\lambda^{(i)})P(z;\lambda^{(i)})}{\int_{z} P(E_k|z;\lambda^{(i)})P(z;\lambda^{(i)})dz} ln (  P(E_k|z;\lambda))P(z;\lambda))dz \\ 
+令 \gamma_{ki} &= \frac{P(E_k|z;\lambda^{(i)})P(z;\lambda^{(i)})}{\int_{z} P(E_k|z;\lambda^{(i)})P(z;\lambda^{(i)})dz} \\
+则 Q(\lambda,\lambda^{(i)}) &= -\frac{\sum_{j=1}^n T_j}{\lambda}-nln(\lambda)+\sum_{k=1}^{m} \int_{z} \gamma_{ki}ln (  P(E_k|z;\lambda))P(z;\lambda))dz \\
+\end{align}
+$$
+
+$$
+P(z;\lambda^{(i)}) = \frac{1}{\lambda^{(i)}}e^{-\frac{z}{\lambda^{(i)}}} \\
+P(E_k=1|z;\lambda^{(i)}) = P(z>t;\lambda^{(i)}) = I(z>t) \\
+P(E_k=0|z;\lambda^{(i)}) = P(z<t;\lambda^{(i)}) = I(0<z<t) \\
+\frac{\partial P(E_k = 1 |z;\lambda)}{\partial \lambda} = 0 \\
+\frac{\partial P(E_k = 0 |z;\lambda)}{\partial \lambda} = 0 \\
+\frac{\partial P(z;\lambda)}{\partial \lambda} = \frac{1}{\lambda^2}(1-\frac{z}{\lambda}) e^{-\frac{z}{\lambda}} , 0<z<\lambda \\
+由于都是大于 t的\\
+因此 Q(\lambda,\lambda^{(i)}) = -\frac{\sum_{j=1}^n T_j}{\lambda}-nln(\lambda)-\sum_{k=1}^{m} \int_{z} \gamma_{ki}(\frac{z}{\lambda}+ln(\lambda))dz \\
+\frac{1}{P(z;\lambda)}\frac{\partial P(z;\lambda)}{\partial \lambda} =\frac{1}{\lambda}(1-\frac{z}{\lambda}),z>0
+$$
+
+$$
+\begin{align}
+\frac{\partial Q(\lambda,\lambda^{(i)})}{\partial \lambda} &= \frac{\sum_{j=1}^n T_j}{\lambda^2}-\frac{n}{\lambda}-\sum_{k=1}^{m}\int_z \gamma_{ki}\frac{1}{\lambda}(1-\frac{z}{\lambda})dz \\
+& = \frac{\sum_{j=1}^n T_j}{\lambda^2}-\frac{n}{\lambda}-\sum_{k=1}^{m} [\frac{1}{\lambda}\int_z \gamma_{ki}dz-\frac{1}{\lambda^2}\int_z z\gamma_{ki}dz] \\
+\int_{t}^{\infty} \gamma_{ki}dz & = e^{-t/\lambda^{(i)}} ,z>t  \\
+\int_z z\gamma_{ki}dz & =    \left\{\begin{array}{rcl}
+ [\lambda^{(i)}-(\lambda^{(i)}+t)e^{-\frac{t}{\lambda^{(i)}}}]/(1-e^{-\frac{t}{\lambda^{(i)}}}),E_k = 0,0<z<t\\
+(\lambda^{(i)}+t) ,E_k=1,z>t \\
+\end{array}\right. \\
+\Rightarrow \frac{\partial Q(\lambda,\lambda^{(i)})}{\partial \lambda} &= \frac{\sum_{j=1}^n T_j}{\lambda^2}-\frac{n}{\lambda} -\frac{m}{\lambda}+\frac{m}{\lambda^2}(\lambda^{(i)}+t) =0 \\
+\Rightarrow \lambda^{(i+1)} &= \frac{\sum_{j=1}^n T_j +m(\lambda^{(i)}+t)}{n+m},其中t = 1,m=3,n= 7
+\end{align}
+$$
+
+```{r}
+T <- c(0.54,0.48,0.33,0.43,0.91,0.21,0.85)
+E <- c(1,1,1)
+t <- 1
+
+EM <- function(T,E,t,max.it = 10000,eps = 1e-6){
+  n <- length(T)
+  m <- length(E)
+  lambda1 <- 3
+  lambda2 <-0.5 #初始值
+  while(abs(lambda1-lambda2)>=eps){
+    lambda1 <- lambda2
+    lambda2 <- (sum(T)+m*(lambda1+t))/(n+m)
+  }
+  return(lambda2)
+}
+paste("EM = ",EM(T,E,t,max.it = 10000,eps = 1e-6))
+paste("MLE = ",(sum(T)+sum(E))/length(T))
+```
+
+利用极大似然估计(MLE)
+
+$$
+\begin{align}
+L(Y|\lambda) & = \prod_{i=1}^n \frac{1}{\lambda} e^{-\frac{T_i}{\lambda}}\prod_{k=1}^m P(x_i>t)  \\
+&=\frac{1}{\lambda^n}   e^{-\frac{\sum_{i=1}^n T_i}{\lambda}}e^{-\frac{\sum_{j=1}^m t}{\lambda}} \\
+参数的先验分布为&无信息先验,\pi(\lambda) = 1 \\
+则后验分布为 L(\lambda|Y) &=\frac{1}{\lambda^n}   e^{-\frac{\sum_{i=1}^n T_i}{\lambda}}e^{-\frac{\sum_{j=1}^m E_j}{\lambda}} \\
+对数先验为\\
+l(\lambda|Y) & \propto -\frac{\sum_{j=1}^m E_j}{\lambda}-\frac{\sum_{i=1}^n T_i}{\lambda}-nln(\lambda)\\
+\frac{\partial l(Y|\lambda)}{\partial \lambda} &= \frac{\sum_{j=1}^m E_j+\sum_{i=1}^n T_i}{\lambda^2}-n\frac{1}{\lambda}=0 \\
+\Rightarrow \lambda = \frac{\sum_{j=1}^m E_j+\sum_{i=1}^n T_i}{n}
+\end{align}
+$$
+
+
+------------------------------------------------------------------------
+## The homework 9 2021-11-25
+
+## Question
+
+Exercises 1 and 5 (page 204, Advanced R) Excecises 1 and 7 (page 214, Advanced R)
+
+## Answer
+
+#### 11.1.2.1
+
+Why are the following two invocations of lapply() equivalent?
+
+```{r}
+set.seed(12315)
+trims <- c(0, 0.1, 0.2, 0.5)
+x <- rcauchy(100)
+
+lapply(trims, function(trim) mean(x, trim = trim))
+lapply(trims, mean, x = x)
+```
+因为$lapply(X,FUN,其他参数)$是返回一个与X长度相同的列表，飞哥元素都是将函数FUN作用应用于X的响应元素的结果
+$mean(x,trim = ,na.rm = FALSE,...)$
+其中x是数值向量，仅仅当$trim=0$时，复数向量才可以
+$trim$是$[0,0.5]$的比例系数
+在计算均值之前，从x的两端去掉观测值的比例$(0\sim 0.5)$
+在 $lapply(trims, function(trim) mean(x, trim = trim))$中
+函数$mean$计算去掉两端trim的比例 ,其实 写成$lapply(trims, function(trim) mean(x, trim))$
+结果是一样的
+trim放在mean的参数列表前面，后面就要指定$x=data$即$mean(trim,x=x)$
+trim放在mean的参数列表后面，可以直接写成$mean(x,trim)
+```{r}
+lapply(trims, function(trim) mean(x,trim))
+```
+
+#### 11.1.2.5
+
+For each model in the previous two exercises, extract $R^2$ using the function below.
+
+``` {.yaml}
+rsq <- function(mod) summary(mod)$r.squared
+```
+
+(1)
+Use both for loops and lapply() to fit linear models to the
+mtcars using the formulas stored in this list:
+```{r}
+rm(list=ls())
+
+formulas <- list(
+mpg ~ disp,
+mpg ~ I(1/disp),
+mpg ~ disp + wt,
+mpg ~ I(1/disp) + wt
+)
+
+boot_df <- function(x){
+  return(x[sample(nrow(x), replace = TRUE), ])
+} 
+
+rsq <- function(mod) {
+  summary(mod)$r.squared
+}
+
+boot_lm <- function(formu){
+  dat <- boot_df(mtcars)
+  rsq(lm(formu,data = dat))
+}
+#用lapply()
+#lapply(formulas,lm,data = boot_df(mtcars))
+
+lapply(formulas,boot_lm)
+
+
+#用for
+
+for (i in 1:length(formulas)){
+  print(boot_lm(formulas[[i]]))
+}
+
+
+
+#因为用了boot_strap所以两个结果不一样
+```
+
+
+(2)
+Fit the model mpg ~ disp to each of the bootstrap replicates
+of mtcars in the list below by using a for loop and lapply().
+Can you do it without an anonymous function?
+
+```{r}
+bootstraps <- lapply(1:10, function(i) {
+rows <- sample(1:nrow(mtcars), rep = TRUE)
+mtcars[rows, ]
+})
+
+boot_mpg_disp <- function(dat){
+  rsq(lm(mpg~disp,data = boot_df(dat)))
+}
+#使用lapply
+lapply(bootstraps, boot_mpg_disp)
+
+#使用for循环
+for (i in 1:length(bootstraps)){
+  dat <- boot_df(bootstraps[[i]])
+  print(rsq(lm(mpg~disp,data = dat)))
+}
+```
+
+#### 11.2.5.1
+
+Use vapply() to: 
+a) Compute the standard deviation of every column in a numeric data frame. 
+b) Compute the standard deviation of every numeric column in a mixed data frame. (Hint: you'll need to use vapply() twice.)
+
+(a)
+```{r}
+n <- 100
+df <- data.frame(x = 1:n, y = rnorm(n,0,1))
+vapply(df,sd,c(1))
+```
+(b)
+```{r}
+n <- 100
+df <- data.frame(x = rchisq(n,1), y = letters[1:10],z = rnorm(n,0,1))
+
+vapply(df,function(dat){
+  if(is.numeric(dat)==TRUE){
+    return(sd(dat))
+  }
+  else{
+    return(NA)
+  }
+},c(1.2))
+#a <- vapply(df, class, character(1)) == "numeric" 
+#vapply(df,sd,c(1))
+```
+#### 11.2.5.7
+
+Implement mcsapply(), a multicore version of sapply(). Can you implement mcvapply(), a parallel version of vapply()? Why or why not?
+
+```
+library(parallel)
+#detectCores函数可以告诉你你的CPU可使用的核数
+detectCores() 
+
+mcsapply <-function(x,Fun,...){
+  #cores 指定计算核的数量
+  mc <- getOption("mc.cores", detectCores() ) 
+  res <- mclapply(x, fun, mc.cores = mc);
+  return(res)
+}
+
+
+mcvapply <-function(x,Fun,cha,cores =4,...){
+  #cha指定返回的类型
+  mc <- getOption("mc.cores", detectCores() ) 
+  res <- mclapply(x, fun, mc.cores = mc); 
+  return(res)
+}
+
+n <- 100
+df <- data.frame(x = 1:n, y = rnorm(n,0,1))
+mcsapply(df,sd)
+```
+Windows上跑不了mc.cores
+
+
+------------------------------------------------------------------------
+
+
+

@@ -5,6 +5,10 @@ usethis::use_package("bootstrap")
 usethis::use_package("stats")
 usethis::use_package("base")
 usethis::use_package("utils")
+usethis::use_package("FNN")
+usethis::use_package("energy")
+usethis::use_package("Ball")
+
 
 
 
