@@ -1,0 +1,67 @@
+---
+title: "intro"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{intro}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(StatComp21049)
+```
+
+
+# The Guide to my functions
+
+## Get_Matrix_Eigens
+
+
+## Downsample
+
+this is my function code
+
+```R
+Downsample <- function(timeseq, dataseq, dft=16){
+  sizedata <- dim(dataseq)
+  m <- sizedata[1]
+  n <- sizedata[2]
+
+
+  dt <- diff(timeseq)
+  meanft <- mean(1./dt)
+  rfolde <- round(meanft/dft)
+
+
+  if(rfolde > 1){
+    T <- ceiling(m/rfolde)
+    time_downsampled <- numeric(T)
+    data_downsampled <- matrix(0,T,n)
+    for(i in 1:T){
+      time_downsampled[i] <- timeseq[4*i-3]
+      for(j in 1:n){
+        data_downsampled[i,j] <- dataseq[4*i-3,j]
+      }
+    }
+  }
+  else{
+    time_downsampled <- timeseq
+    data_downsampled <- dataseq
+
+  }
+  rec <- list(time_downsampled = time_downsampled,data_downsampled=data_downsampled)
+  return(rec)
+}
+```
+
+# test
+
+
+# test
