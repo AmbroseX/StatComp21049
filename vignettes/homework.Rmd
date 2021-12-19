@@ -339,5 +339,168 @@ hist(x,prob=TRUE,main=expression(f(x)==p*x1+(1-p)*x2))
 
 所以$P\in (0.45-0.55)$左右时，会产生双峰分布
 
+#### 3.20:
+
+A compound Poisson process is a stochastic process $\{X(t), t ≥ 0\}$
+that can be represented as the random sum
+$X(t) =\sum_{i=1}^{N(t)} Yi, t ≥ 0, where \{N(t), t ≥ 0\}$ is a Poisson
+process and $Y_1, Y_2,...$are $iid$ and independent of
+$\{N(t), t ≥ 0\}.$ Write a program to simulate a compound
+$Poisson(λ)–Gamma \ process (Y \ has \ a \ Gamma\  distribution)$.
+Estimate the mean and the variance of $X(10)$ for several choices of the
+parameters and compare with the theoretical values. Hint: Show
+that$E[X(t)] = λtE[Y1]$ and$Var(X(t)) = λtE[Y_1^{2}]$.
+
+解：\
+${Y_i}$是Gamma分布，$N(t)$是泊松过程\
+In R, the Gamma distribution with parameters $shape = a$ and $scale = s$
+has density
+$$f(x)= \frac{1}{s^a\Gamma(a)} x^{a-1} e^{-x/s},\quad x\geq 0, a>0,s>0$$
+You can use "rgamma(n,shape=a,scale=s)" to generate n gamma random
+numbers.
+
+$$E[X]=\frac{\alpha}{\lambda}=as, \quad \operatorname{Var}(X)=\frac{\alpha}{\lambda^{2}}=as^2 \\
+(E[X])^2 = a^2s^2, \quad E[X^2]= Var(X)+(E(X))^2=as^2+a^2s^2
+$$
+
+泊松分布 $$P(X=k)=\frac{\lambda^k}{k!}e^{-\lambda},\quad k=0,1,...$$
+泊松过程
+$$P(X(t)=k)=\frac{(\lambda t)^k}{k!}e^{-\lambda t},\quad k=0,1,...$$ You
+can use "rpois(n,lambda)" to generate n Poison random numbers.\
+1) Generate n Poison distribution random numbers. 2) Generate n Gamma
+distribution random numbers. 3)
+根据泊松分布的值Np(t)，对Y的前Np项进行求和作为X(t)的值
+
+画出$Poisson(\lambda)-gamma\ process$
+
+```{r}
+rm(list=ls())
+lambda.poison<-2
+lambda.gamma<-1
+a = 1
+n<-1e3
+Npoison<-numeric(n)
+k<-1
+while(k<=n){
+  Npoison[k]<-rpois(1,lambda.poison*k)
+  k <- k+1
+}
+maxp<- max(Npoison)
+Y<-rgamma(maxp,shape = a,scale =1/lambda.gamma)
+x<-numeric(n)
+k<-1
+while(k<=n){
+  x[k]<-sum(Y[1:Npoison[k]])
+  k+1->k
+}
+plot(x)
+```
+
+(1)对$X(10)$进行模拟计算
+
+```{r}
+rm(list=ls())
+lambda.poison<-2
+lambda.gamma<-1
+a = 1
+t=10
+n<-1e4
+k<-1
+x<-numeric(n)
+while(k<=n){
+  Npoison<-rpois(1,lambda.poison*t)
+  Y<-rgamma(Npoison,shape = a,scale =1/lambda.gamma)
+  x[k]<-sum(Y[1:Npoison])
+  k+1->k
+}
+paste('E[X(10)]=',mean(x))
+paste('Var(X(10)=',var(x))
+```
+
+理论计算值： $$
+E[X(t)]=\lambda t E[Y_1]=10\lambda a/\lambda_{gamma} \\
+Var[x]=\lambda t E[Y_1^2]=10\lambda (a+a^2)/\lambda_{gamma}^2
+$$
+
+```{r}
+rm(list=ls())
+lambda.poison<-2
+lambda.gamma<-1
+a = 1
+Ex10<-10*lambda.poison*a/lambda.gamma
+Var10<-10*lambda.poison*(a+a^2)/lambda.gamma^2
+paste("E[X(10)]=",Ex10,",Var[X(10)]=",Var10)
+```
+
+(2)对$X(10)$进行模拟计算
+
+```{r}
+rm(list=ls())
+lambda.poison<-2
+lambda.gamma<-2
+a = 1
+t=10
+n<-1e4
+k<-1
+x<-numeric(n)
+while(k<=n){
+  Npoison<-rpois(1,lambda.poison*t)
+  Y<-rgamma(Npoison,shape = a,scale =1/lambda.gamma)
+  x[k]<-sum(Y[1:Npoison])
+  k+1->k
+}
+paste('E[X(10)]=',mean(x))
+paste('Var(X(10)=',var(x))
+```
+
+理论计算值： $$
+E[X(t)]=\lambda t E[Y_1]=10\lambda a/\lambda_{gamma} \\
+Var[x]=\lambda t E[Y_1^2]=10\lambda (a+a^2)/\lambda_{gamma}^2
+$$
+
+```{r}
+rm(list=ls())
+lambda.poison<-2
+lambda.gamma<-2
+a = 1
+Ex10<-10*lambda.poison*a/lambda.gamma
+Var10<-10*lambda.poison*(a+a^2)/lambda.gamma^2
+paste("E[X(10)]=",Ex10,",Var[X(10)]=",Var10)
+```
+
+(3)对$X(10)$进行模拟计算
+
+```{r}
+rm(list=ls())
+lambda.poison<-5
+lambda.gamma<-4
+a = 2
+t=10
+n<-1e4
+k<-1
+x<-numeric(n)
+while(k<=n){
+  Npoison<-rpois(1,lambda.poison*t)
+  Y<-rgamma(Npoison,shape = a,scale =1/lambda.gamma)
+  x[k]<-sum(Y[1:Npoison])
+  k+1->k
+}
+paste('E[X(10)]=',mean(x),'Var(X(10)=',var(x))
+```
+
+理论计算值： $$
+E[X(t)]=\lambda t E[Y_1]=10\lambda a/\lambda_{gamma} \\
+Var[x]=\lambda t E[Y_1^2]=10\lambda (a+a^2)/\lambda_{gamma}^2
+$$
+
+```{r}
+rm(list=ls())
+lambda.poison<-5
+lambda.gamma<-4
+a = 2
+Ex10<-10*lambda.poison*a/lambda.gamma
+Var10<-10*lambda.poison*(a+a^2)/lambda.gamma^2
+paste("E[X(10)]=",Ex10,",Var[X(10)]=",Var10)
+```
 
 
