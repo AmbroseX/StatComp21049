@@ -623,3 +623,28 @@ Var(\frac{X+X'}{2}) &= (Var(X)+Var({X'})+2Cov(X,X'))/4 \\
 &=1-\frac{\pi}{4}+\frac{1}{2}\sigma^2 \int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})(\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})dy
 \end{align}
 $$ 
+两个独立的随机变量的方差 
+$$
+\begin{align}
+Cov(X_1,X_2) &= 0 \\
+Var(X_1) &= Var(X_2)=\sigma^2\int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})^2dy = (2-\frac{\pi}{2})\sigma^2\\ \\
+Var(\frac{X_1+X_2}{2}) &=(Var(X_1)+Var(X_2))/4 = 1-\frac{\pi}{4}  \\
+\end{align}
+$$
+因此方差减小的百分比为 
+$$
+\begin{align}
+Percent \ reduction &=\frac{(Var_x-Var_{x'})}{Var_x}\times 100\%  \\
+&=\frac{2}{\pi-4}\int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})(\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})dy \times 100\% \\
+\end{align}
+$$
+(1)求协方差积分
+$$
+\frac{1}{\sigma^2}Cov(X,X') = \int_0^1 (\sqrt{-2ln(1-y)}-\sqrt{\frac{\pi}{2}})(\sqrt{-2ln(y)}-\sqrt{\frac{\pi}{2}})dy
+$$
+```
+rm(list=ls())
+m<-1e5;y<-runif(m)
+covx12 <- mean((sqrt(-2*log(y))-sqrt(pi/2))*(sqrt(-2*log(1-y))-sqrt(pi/2)))
+paste("Cov(X,X') = ",covx12)
+```
