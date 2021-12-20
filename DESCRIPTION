@@ -1,6 +1,6 @@
 Package: StatComp21049
 Title: To calculate the phase space of worm movements
-Version: 0.0.1
+Version: 0.1
 Authors@R: 
     person("Rongkang", "Xiong", , "earth@mail.ustc.edu.cn", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))

@@ -18,6 +18,6 @@ Each line represents the curvature of 100 segments of the body at a moment
 Column i represents the curvature of the body of the ith segment over time.
 }
 \seealso{
-\link{time_Elapsed}
+\link{time_Elapsed},\link{w}
 }
 \keyword{datasets}

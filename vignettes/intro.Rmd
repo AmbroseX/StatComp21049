@@ -18,17 +18,19 @@ knitr::opts_chunk$set(
 library(StatComp21049)
 ```
 
-
 # The Guide to my functions
 
-## Get_Matrix_Eigens
 
+
+
+
+## Get_Matrix_Eigens
 
 ## Downsample
 
 this is my function code
 
-```R
+``` {.r}
 Downsample <- function(timeseq, dataseq, dft=16){
   sizedata <- dim(dataseq)
   m <- sizedata[1]
@@ -61,7 +63,13 @@ Downsample <- function(timeseq, dataseq, dft=16){
 }
 ```
 
-# test
+We use it to downsample data
 
+```{r}
+
+
+```
+
+# test
 
 # test
