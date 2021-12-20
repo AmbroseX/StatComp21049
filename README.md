@@ -12,7 +12,7 @@ You can install the development version of StatComp21049 from [GitHub](https://g
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("RongkangXiong/StatComp21049")
+devtools::install_github("RongkangXiong/StatComp21049",build_vignettes = TRUE)
 ```
 
 ## Example
