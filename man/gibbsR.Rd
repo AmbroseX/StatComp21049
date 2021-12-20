@@ -19,8 +19,8 @@ A Gibbs sampler using R
 }
 \examples{
 \dontrun{
-rnR <- gibbsR(100,10)
-plot(rnR[1,],type='l')
-plot(rnR[2,],type='l')
+rnR <- gibbsR(100, 10)
+plot(rnR[1, ], type = "l")
+plot(rnR[2, ], type = "l")
 }
 }

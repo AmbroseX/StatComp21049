@@ -4,13 +4,13 @@
 #' @return a number, the dimension of the matrix X
 #' @examples
 #' \dontrun{
-#' X <- matrix(rnorm(200*100),200,100)
+#' X <- matrix(rnorm(200 * 100), 200, 100)
 #' ev <- Get_Matrix_Dimension(X)
 #' }
 #' @export
-Get_Matrix_Dimension <- function(X){
+Get_Matrix_Dimension <- function(X) {
   ev <- Get_Matrix_Eigens(X)
   eigenvalues <- ev$values
-  PR <- sum(eigenvalues)^2/(sum(eigenvalues^2))
+  PR <- sum(eigenvalues)^2 / (sum(eigenvalues^2))
   return(PR)
 }

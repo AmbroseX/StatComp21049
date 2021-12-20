@@ -17,7 +17,7 @@ Returns the dimension of the matrix X
 }
 \examples{
 \dontrun{
-X <- matrix(rnorm(200*100),200,100)
+X <- matrix(rnorm(200 * 100), 200, 100)
 ev <- Get_Matrix_Dimension(X)
 }
 }
