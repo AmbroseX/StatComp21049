@@ -15,7 +15,8 @@ You can install the development version of StatComp21049 from [GitHub](https://g
 devtools::install_github("RongkangXiong/StatComp21049",build_vignettes = TRUE)
 ```
 
-You can 
+You can access the project's home page query help documentation from
+[StatComp21049](https://RongkangXiong/StatComp21049)
 
 ## Example
 
