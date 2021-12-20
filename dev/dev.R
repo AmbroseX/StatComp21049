@@ -13,7 +13,6 @@ usethis::use_package("Ball")
 
 
 
-
 usethis::use_rcpp()
 usethis::use_mit_license("Rongkang Xiong")
 usethis::use_readme_md()
@@ -41,6 +40,7 @@ devtools::build_vignettes()
 
 # 让我们来试一下看创建我们的网站
 pkgdown::build_site()
+
 
 
 # CRAN

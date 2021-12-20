@@ -14,9 +14,18 @@ knitr::opts_chunk$set(
 )
 ```
 
+You can visit the online webpage to view the help documentation from
+[Github-StatComp21049](https://rongkangxiong.github.io/StatComp21049)
+
 ```{r setup}
 library(StatComp21049)
 ```
+
+
+# Theory of Phase Space Reconstruction
+![](https://cdn.jsdelivr.net/gh/RongkangXiong/pic-bed/blog/img/202112201851366.png)
+
+
 
 # Simple use
 
@@ -47,16 +56,9 @@ plot(X[, 6], X[, 7], type = "l")
 # The Guide to my functions
 
 
-
-
-
-## Get_Matrix_Eigens
-
-
-
 ## Downsample
 
-this is my function code
+this is my function code to downsample time sequence and data sequence
 
 ``` {.r}
 Downsample <- function(timeseq, dataseq, dft=16){
@@ -91,10 +93,43 @@ Downsample <- function(timeseq, dataseq, dft=16){
 }
 ```
 
-We use it to downsample data
-
-```{r}
 
 
+## Get_Matrix_Eigens
+This is the function to get the eigenvalue and eigenvectors of the data matrix
+
+```r
+Get_Matrix_Eigens <- function(X) {
+  CovX <- t(X) %*% t(t(X))
+  ev <- eigen(CovX)
+  return(ev)
+}
 ```
+
+## Embedding_delay
+This is the function to delay the data matrix
+
+```r
+Embedding_delay <- function(X, K_mode_dimension = 5, K_delay = 12) {
+  num_Frame <- dim(X)[1]
+  Ybase <- matrix(0, num_Frame - K_delay + 1, K_mode_dimension * K_delay)
+  j <- 1
+  for (k in 1:K_delay) {
+    Ybase[, j:(j + K_mode_dimension - 1)] <- X[k:(k + num_Frame - K_delay), 1:K_mode_dimension]
+    j <- j + K_mode_dimension
+  }
+  return(Ybase)
+}
+```
+# This is the results in MATLAB
+![](https://cdn.jsdelivr.net/gh/RongkangXiong/pic-bed/blog/img/202112201901769.png)
+
+
+# This is the results in R
+
+The dataset is only one-tenth of that of MATLAB due to its size limitations
+
+
+![](https://cdn.jsdelivr.net/gh/RongkangXiong/pic-bed/blog/img/202112201856062.png)
+![](https://cdn.jsdelivr.net/gh/RongkangXiong/pic-bed/blog/img/202112201855871.png)
 
