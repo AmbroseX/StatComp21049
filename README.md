@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-StatComp21049 is a R package developed to present the homework of statistic computing course by author StatComp21049 and Calculate the Phase space for worm behavior.
+StatComp21049 is a R package developed to present the homework of statistic computing course by author StatComp21049 and reconstruct the Phase space for worm behavior.
 
 
 <center>This is the Phase space reconstruction theory </center>

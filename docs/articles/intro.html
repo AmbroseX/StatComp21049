@@ -77,9 +77,28 @@
 <p><img src="https://cdn.jsdelivr.net/gh/RongkangXiong/pic-bed/blog/img/202112201851366.png"></p>
 </div>
 <div class="section level1">
+<h1 id="prepare-the-data">Prepare the data<a class="anchor" aria-label="anchor" href="#prepare-the-data"></a>
+</h1>
+<p>I use <code>/data-raw/DATASET.R</code> to transform the raw-data into data</p>
+<pre><code><span class="co">## code to prepare `DATASET` dataset goes here</span>
+<span class="co"># batch_deseq ------------------------------------------------------------------</span>
+
+<span class="va">curve_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"data-raw/curve_data.csv"</span>, header <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="va">curve_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.matrix.html" class="external-link">data.matrix</a></span><span class="op">(</span><span class="va">curve_data</span><span class="op">)</span> <span class="co"># 灏哾ataframe杞崲涓虹煩闃<b5></b5></span>NA<span class="va">time_Elapsed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"data-raw/TimeElapsed.csv"</span>, header <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="va">time_Elapsed</span> <span class="op">&lt;-</span> <span class="va">time_Elapsed</span><span class="op">$</span><span class="va">V1</span>
+
+<span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"data-raw/w.csv"</span>, header <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.matrix.html" class="external-link">data.matrix</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span>
+<span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">w</span><span class="op">)</span>
+
+<span class="fu">usethis</span><span class="fu">::</span><span class="fu"><a href="https://usethis.r-lib.org/reference/use_data.html" class="external-link">use_data</a></span><span class="op">(</span><span class="va">curve_data</span>, compress <span class="op">=</span> <span class="st">"xz"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu">usethis</span><span class="fu">::</span><span class="fu"><a href="https://usethis.r-lib.org/reference/use_data.html" class="external-link">use_data</a></span><span class="op">(</span><span class="va">time_Elapsed</span>, compress <span class="op">=</span> <span class="st">"xz"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu">usethis</span><span class="fu">::</span><span class="fu"><a href="https://usethis.r-lib.org/reference/use_data.html" class="external-link">use_data</a></span><span class="op">(</span><span class="va">w</span>, compress <span class="op">=</span> <span class="st">"xz"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre>
+</div>
+<div class="section level1">
 <h1 id="simple-use">Simple use<a class="anchor" aria-label="anchor" href="#simple-use"></a>
 </h1>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">StatComp21049</span><span class="op">)</span>
 <span class="co">## basic example code</span>
 
@@ -108,7 +127,7 @@
 <h2 id="downsample">Downsample<a class="anchor" aria-label="anchor" href="#downsample"></a>
 </h2>
 <p>this is my function code to downsample time sequence and data sequence</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">Downsample</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">timeseq</span>, <span class="va">dataseq</span>, <span class="va">dft</span><span class="op">=</span><span class="fl">16</span><span class="op">)</span><span class="op">{</span>
   <span class="va">sizedata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dataseq</span><span class="op">)</span>
   <span class="va">m</span> <span class="op">&lt;-</span> <span class="va">sizedata</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>
@@ -144,7 +163,7 @@
 <h2 id="get_matrix_eigens">Get_Matrix_Eigens<a class="anchor" aria-label="anchor" href="#get_matrix_eigens"></a>
 </h2>
 <p>This is the function to get the eigenvalue and eigenvectors of the data matrix</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">Get_Matrix_Eigens</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">CovX</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>
   <span class="va">ev</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">CovX</span><span class="op">)</span>
@@ -152,10 +171,15 @@
 <span class="op">}</span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="get_matrix_dimension">Get_Matrix_Dimension<a class="anchor" aria-label="anchor" href="#get_matrix_dimension"></a>
+</h2>
+<p><span class="math inline">\(dim = \frac{(\lambda_i)^2}{\sum_{i} \lambda_i^2}, \lambda_i\)</span> is the eigenvalue of the matrix.</p>
+</div>
+<div class="section level2">
 <h2 id="embedding_delay">Embedding_delay<a class="anchor" aria-label="anchor" href="#embedding_delay"></a>
 </h2>
 <p>This is the function to delay the data matrix</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">Embedding_delay</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">X</span>, <span class="va">K_mode_dimension</span> <span class="op">=</span> <span class="fl">5</span>, <span class="va">K_delay</span> <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">num_Frame</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>
   <span class="va">Ybase</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">num_Frame</span> <span class="op">-</span> <span class="va">K_delay</span> <span class="op">+</span> <span class="fl">1</span>, <span class="va">K_mode_dimension</span> <span class="op">*</span> <span class="va">K_delay</span><span class="op">)</span>
@@ -171,7 +195,7 @@
 <div class="section level1">
 <h1 id="this-is-the-results-in-matlab">This is the results in MATLAB<a class="anchor" aria-label="anchor" href="#this-is-the-results-in-matlab"></a>
 </h1>
-<p><img src="https://cdn.jsdelivr.net/gh/RongkangXiong/pic-bed/blog/img/202112201901769.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/RongkangXiong/pic-bed/blog/img/202112201901769.png"><img src="https://cdn.jsdelivr.net/gh/RongkangXiong/pic-bed/blog/img/202112201907918.png"></p>
 </div>
 <div class="section level1">
 <h1 id="this-is-the-results-in-r">This is the results in R<a class="anchor" aria-label="anchor" href="#this-is-the-results-in-r"></a>

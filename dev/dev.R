@@ -42,6 +42,8 @@ devtools::build_vignettes()
 pkgdown::build_site()
 
 
+# 文档
+devtools::document()
 
 # CRAN
 # 拼写检查
@@ -58,6 +60,13 @@ devtools::release()
 
 # 导入包运行
 devtools::load_all()
+
+
+# build 包
+devtools::build()
+
+# 删除包
+remove.packages("StatComp21049",.libPaths()[1])
 
 
 
