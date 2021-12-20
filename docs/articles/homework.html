@@ -410,9 +410,9 @@ In R, the Gamma distribution with parameters <span class="math inline">\(shape =
   <span class="va">k</span><span class="op">+</span><span class="fl">1</span><span class="op">-&gt;</span><span class="va">k</span>
 <span class="op">}</span>
 <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'E[X(10)]='</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "E[X(10)]= 20.0195501228563"</span>
+<span class="co">#&gt; [1] "E[X(10)]= 19.9689874276965"</span>
 <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'Var(X(10)='</span>,<span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "Var(X(10)= 40.9187136973339"</span></code></pre></div>
+<span class="co">#&gt; [1] "Var(X(10)= 40.9755736885445"</span></code></pre></div>
 <p>理论计算值 <span class="math display">\[
 E[X(t)]=\lambda t E[Y_1]=10\lambda a/\lambda_{gamma} \\
 Var[x]=\lambda t E[Y_1^2]=10\lambda (a+a^2)/\lambda_{gamma}^2
@@ -443,9 +443,9 @@ Var[x]=\lambda t E[Y_1^2]=10\lambda (a+a^2)/\lambda_{gamma}^2
   <span class="va">k</span><span class="op">+</span><span class="fl">1</span><span class="op">-&gt;</span><span class="va">k</span>
 <span class="op">}</span>
 <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'E[X(10)]='</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "E[X(10)]= 9.96879496917157"</span>
+<span class="co">#&gt; [1] "E[X(10)]= 10.0104322213961"</span>
 <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'Var(X(10)='</span>,<span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "Var(X(10)= 9.97013025577422"</span></code></pre></div>
+<span class="co">#&gt; [1] "Var(X(10)= 10.0493887537351"</span></code></pre></div>
 <p>理论计算值： <span class="math display">\[
 E[X(t)]=\lambda t E[Y_1]=10\lambda a/\lambda_{gamma} \\
 Var[x]=\lambda t E[Y_1^2]=10\lambda (a+a^2)/\lambda_{gamma}^2
@@ -476,7 +476,7 @@ Var[x]=\lambda t E[Y_1^2]=10\lambda (a+a^2)/\lambda_{gamma}^2
   <span class="va">k</span><span class="op">+</span><span class="fl">1</span><span class="op">-&gt;</span><span class="va">k</span>
 <span class="op">}</span>
 <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'E[X(10)]='</span>,<span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>,<span class="st">'Var(X(10)='</span>,<span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] "E[X(10)]= 25.0535485698751 Var(X(10)= 18.9874990538286"</span></code></pre></div>
+<span class="co">#&gt; [1] "E[X(10)]= 24.967313500404 Var(X(10)= 18.6365123640225"</span></code></pre></div>
 <p>理论计算值： <span class="math display">\[
 E[X(t)]=\lambda t E[Y_1]=10\lambda a/\lambda_{gamma} \\
 Var[x]=\lambda t E[Y_1^2]=10\lambda (a+a^2)/\lambda_{gamma}^2
@@ -531,7 +531,7 @@ pbeta(x,3,3) =\frac{1}{B(3,3)} \int _0^x t^{2}(1-t)^{2}dt = \frac{x}{B(3,3)}E[t^
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Estimate"</span>, <span class="st">"Theoretical"</span><span class="op">)</span>
 <span class="va">result</span>
 <span class="co">#&gt;             Estimate Theoretical</span>
-<span class="co">#&gt; Beta(3,3) 0.03353164  0.03333333</span></code></pre></div>
+<span class="co">#&gt; Beta(3,3) 0.03340309  0.03333333</span></code></pre></div>
 <p>编写求cdf的函数：</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span>list<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
@@ -552,8 +552,8 @@ pbeta(x,3,3) =\frac{1}{B(3,3)} \int _0^x t^{2}(1-t)^{2}dt = \frac{x}{B(3,3)}E[t^
 <span class="va">x</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>,<span class="fl">1</span>,<span class="fl">0.1</span><span class="op">)</span>
 <span class="va">y</span><span class="op">&lt;-</span><span class="fu">pbetaCDF</span><span class="op">(</span><span class="va">x</span>,<span class="fl">3</span>,<span class="fl">3</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span>
-<span class="co">#&gt;  [1] 0.008554481 0.057815539 0.162954949 0.317292109 0.499853673 0.682628059</span>
-<span class="co">#&gt;  [7] 0.836101563 0.941273839 0.990702011 0.999043411</span></code></pre></div>
+<span class="co">#&gt;  [1] 0.008557496 0.057888829 0.163017738 0.317519440 0.499801124 0.682542079</span>
+<span class="co">#&gt;  [7] 0.836513134 0.942156036 0.992122415 1.001122174</span></code></pre></div>
 <p>比较自定义函数和pbeta函数</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">x</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>,<span class="fl">1</span>,<span class="fl">0.1</span><span class="op">)</span>
@@ -564,14 +564,14 @@ pbeta(x,3,3) =\frac{1}{B(3,3)} \int _0^x t^{2}(1-t)^{2}dt = \frac{x}{B(3,3)}E[t^
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>,<span class="st">"pbetaCDF(3,3)"</span>,<span class="st">"pbeta(x,3,3)"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
 <span class="va">result</span>
-<span class="co">#&gt;                       0.1        0.2       0.3       0.4       0.5       0.6</span>
-<span class="co">#&gt; x             0.100000000 0.20000000 0.3000000 0.4000000 0.5000000 0.6000000</span>
-<span class="co">#&gt; pbetaCDF(3,3) 0.008576971 0.05791741 0.1631479 0.3178556 0.5004409 0.6829653</span>
-<span class="co">#&gt; pbeta(x,3,3)  0.008560000 0.05792000 0.1630800 0.3174400 0.5000000 0.6825600</span>
-<span class="co">#&gt;                     0.7       0.8       0.9        1</span>
-<span class="co">#&gt; x             0.7000000 0.8000000 0.9000000 1.000000</span>
-<span class="co">#&gt; pbetaCDF(3,3) 0.8379888 0.9427426 0.9918133 1.000334</span>
-<span class="co">#&gt; pbeta(x,3,3)  0.8369200 0.9420800 0.9914400 1.000000</span></code></pre></div>
+<span class="co">#&gt;                       0.1        0.2       0.3       0.4       0.5      0.6</span>
+<span class="co">#&gt; x             0.100000000 0.20000000 0.3000000 0.4000000 0.5000000 0.600000</span>
+<span class="co">#&gt; pbetaCDF(3,3) 0.008550927 0.05788951 0.1628465 0.3168958 0.4991435 0.682009</span>
+<span class="co">#&gt; pbeta(x,3,3)  0.008560000 0.05792000 0.1630800 0.3174400 0.5000000 0.682560</span>
+<span class="co">#&gt;                    0.7       0.8      0.9         1</span>
+<span class="co">#&gt; x             0.700000 0.8000000 0.900000 1.0000000</span>
+<span class="co">#&gt; pbetaCDF(3,3) 0.836159 0.9411581 0.990621 0.9991613</span>
+<span class="co">#&gt; pbeta(x,3,3)  0.836920 0.9420800 0.991440 1.0000000</span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="section-3">5.9<a class="anchor" aria-label="anchor" href="#section-3"></a>
@@ -692,8 +692,8 @@ g(x)=\frac{x^{2}}{\sqrt{2 \pi}} e^{-x^{2} / 2}, \quad x&gt;1
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"f1(x)"</span>,<span class="st">"f2(x)"</span><span class="op">)</span>
 <span class="va">result</span>
 <span class="co">#&gt;         f1(x)     f2(x)</span>
-<span class="co">#&gt; est 0.3976926 0.3976926</span>
-<span class="co">#&gt; sd  1.0437981 0.1575782</span></code></pre></div>
+<span class="co">#&gt; est 0.3985729 0.3985729</span>
+<span class="co">#&gt; sd  0.9580855 0.1580464</span></code></pre></div>
 <p>Here ‘est’ is <span class="math inline">\(\hat{\theta}\)</span> while ‘sd’ is the standard deviation of <span class="math inline">\(\frac{g(Xi )}{f (Xi )}\)</span> instead of <span class="math inline">\(\hat{\theta}\)</span> So <span class="math inline">\(f_2(x)=e^{-x+1}\)</span> produce the smaller variance in estimating.</p>
 </div>
 <div class="section level4">
@@ -771,9 +771,9 @@ T = \frac{\bar{X}-\mu}{S_n/\sqrt{n}} \sim t_{n-1}
 <span class="va">alpha</span> <span class="op">&lt;-</span> <span class="fl">0.05</span>
 <span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">rchisq</a></span><span class="op">(</span><span class="va">m</span>,<span class="va">n</span><span class="op">)</span>
 <span class="va">a</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/stats/t.test.html" class="external-link">t.test</a></span><span class="op">(</span><span class="va">Y</span>,conf.level <span class="op">=</span> <span class="fl">1</span><span class="op">-</span><span class="va">alpha</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'鍧囧€肩殑 95%t-interval:'</span>NA<span class="va">a</span>NA<span class="op">[</span>NA<span class="fl">4</span>NA<span class="op">]</span>NA<span class="op">)</span>NA<span class="co">#&gt; [1] "鍧囧€肩殑 95%t-interval: c(1.11578878454174, 2.3127686092122)"</span>NA<span class="va">UCL</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">m</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">qchisq</a></span><span class="op">(</span><span class="va">alpha</span>,df<span class="op">=</span><span class="va">m</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'鍧囧€肩殑 95%t-interval:'</span>NA<span class="va">a</span>NA<span class="op">[</span>NA<span class="fl">4</span>NA<span class="op">]</span>NA<span class="op">)</span>NA<span class="co">#&gt; [1] "鍧囧€肩殑 95%t-interval: c(1.51947661481316, 3.53255804286008)"</span>NA<span class="va">UCL</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">m</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">qchisq</a></span><span class="op">(</span><span class="va">alpha</span>,df<span class="op">=</span><span class="va">m</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'upper confidence limits UCL ='</span>,<span class="va">UCL</span><span class="op">)</span>
-<span class="co">#&gt; [1] "upper confidence limits UCL = 3.07111808931513"</span></code></pre></div>
+<span class="co">#&gt; [1] "upper confidence limits UCL = 8.68651431740617"</span></code></pre></div>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span>list<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ls.html" class="external-link">ls</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 <span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">20</span>
@@ -783,7 +783,7 @@ T = \frac{\bar{X}-\mu}{S_n/\sqrt{n}} \sim t_{n-1}
 <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">rchisq</a></span><span class="op">(</span><span class="va">m</span>, df <span class="op">=</span> <span class="va">n</span><span class="op">)</span>
 <span class="va">LCL</span> <span class="op">&lt;-</span> <span class="va">mu0</span><span class="op">+</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/stats/TDist.html" class="external-link">qt</a></span><span class="op">(</span><span class="va">alpha</span><span class="op">/</span><span class="fl">2</span>, df <span class="op">=</span> <span class="va">m</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span>
 <span class="va">UCL</span> <span class="op">&lt;-</span> <span class="va">mu0</span><span class="op">+</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/stats/TDist.html" class="external-link">qt</a></span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">alpha</span><span class="op">/</span><span class="fl">2</span>, df <span class="op">=</span> <span class="va">m</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'鍧囧€肩殑 95%t-interval:['</span>,<span class="va">LCL</span>C<span class="st">','</span>]<span class="va">UCL</span>NA<span class="st">']'</span>NA<span class="op">)</span>NA<span class="co">#&gt; [1] "鍧囧€肩殑 95%t-interval:[ 0.289974376213274 , 3.71002562378673 ]"</span>NA</code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">'鍧囧€肩殑 95%t-interval:['</span>,<span class="va">LCL</span>C<span class="st">','</span>]<span class="va">UCL</span>NA<span class="st">']'</span>NA<span class="op">)</span>NA<span class="co">#&gt; [1] "鍧囧€肩殑 95%t-interval:[ -0.0528546848887941 , 4.05285468488879 ]"</span>NA</code></pre></div>
 <p>MC实验 t-interval 包含了均值<span class="math inline">\(\mu = 2\)</span><br>
 A two sides <span class="math inline">\(100(1−\alpha)\%\)</span> confidence interval of variance is given by <span class="math inline">\(\mu+\frac{S_n}{\sqrt{n}}t_{n-1}(\alpha/2),\mu+\frac{S_n}{\sqrt{n}}t_{n-1}(1-\alpha/2)\)</span></p>
 </div>
