@@ -142,17 +142,69 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(StatComp21049)</span></code></pre></div>
+<div id="simple-use" class="section level1">
+<h1>Simple use</h1>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(StatComp21049)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="do">## basic example code</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;curve_data&quot;</span>, <span class="st">&quot;time_Elapsed&quot;</span>, <span class="st">&quot;w&quot;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="do">## you can use your data to Proceed to the steps below</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">Downsample</span>(time_Elapsed, curve_data, <span class="dv">16</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>time_downsampled <span class="ot">&lt;-</span> rec<span class="sc">$</span>time_downsampled</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>data_downsampled <span class="ot">&lt;-</span> rec<span class="sc">$</span>data_downsampled</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>ev <span class="ot">&lt;-</span> <span class="fu">Get_Matrix_Eigens</span>(data_downsampled)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>eigenvalues <span class="ot">&lt;-</span> ev<span class="sc">$</span>values</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>eigenvectors <span class="ot">&lt;-</span> ev<span class="sc">$</span>vectors</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>PCAmode <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>K_delay <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>Xeigenvector <span class="ot">&lt;-</span> eigenvectors[, <span class="dv">1</span><span class="sc">:</span>PCAmode]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>X_PCA <span class="ot">&lt;-</span> data_downsampled <span class="sc">%*%</span> Xeigenvector</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>test_CurveFilter_embeddingdelay <span class="ot">&lt;-</span> <span class="fu">Embedding_delay</span>(X_PCA, PCAmode, K_delay)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> test_CurveFilter_embeddingdelay <span class="sc">%*%</span> w</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="do">## Plot the projection</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(X[, <span class="dv">3</span>], X[, <span class="dv">4</span>], <span class="at">type =</span> <span class="st">&quot;l&quot;</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(X[, <span class="dv">6</span>], X[, <span class="dv">7</span>], <span class="at">type =</span> <span class="st">&quot;l&quot;</span>)</span></code></pre></div>
+</div>
 <div id="the-guide-to-my-functions" class="section level1">
 <h1>The Guide to my functions</h1>
 <div id="get_matrix_eigens" class="section level2">
 <h2>Get_Matrix_Eigens</h2>
 </div>
+<div id="downsample" class="section level2">
+<h2>Downsample</h2>
+<p>this is my function code</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Downsample <span class="ot">&lt;-</span> <span class="cf">function</span>(timeseq, dataseq, <span class="at">dft=</span><span class="dv">16</span>){</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  sizedata <span class="ot">&lt;-</span> <span class="fu">dim</span>(dataseq)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> sizedata[<span class="dv">1</span>]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> sizedata[<span class="dv">2</span>]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  dt <span class="ot">&lt;-</span> <span class="fu">diff</span>(timeseq)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  meanft <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fl">1.</span><span class="sc">/</span>dt)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  rfolde <span class="ot">&lt;-</span> <span class="fu">round</span>(meanft<span class="sc">/</span>dft)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(rfolde <span class="sc">&gt;</span> <span class="dv">1</span>){</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    T <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(m<span class="sc">/</span>rfolde)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    time_downsampled <span class="ot">&lt;-</span> <span class="fu">numeric</span>(T)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    data_downsampled <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>,T,n)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>T){</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>      time_downsampled[i] <span class="ot">&lt;-</span> timeseq[<span class="dv">4</span><span class="sc">*</span>i<span class="dv">-3</span>]</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span>(j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        data_downsampled[i,j] <span class="ot">&lt;-</span> dataseq[<span class="dv">4</span><span class="sc">*</span>i<span class="dv">-3</span>,j]</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>{</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    time_downsampled <span class="ot">&lt;-</span> timeseq</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    data_downsampled <span class="ot">&lt;-</span> dataseq</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  rec <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">time_downsampled =</span> time_downsampled,<span class="at">data_downsampled=</span>data_downsampled)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rec)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>We use it to downsample data</p>
 </div>
-<div id="test" class="section level1">
-<h1>test</h1>
-</div>
-<div id="test-1" class="section level1">
-<h1>test</h1>
 </div>
 
 

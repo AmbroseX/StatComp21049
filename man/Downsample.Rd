@@ -22,8 +22,8 @@ Downsample the time sequence and data
 }
 \examples{
 \dontrun{
-data("curve_data","time_Elapsed")
-rec <- time_downsample(time_Elapsed,curve_data, 16)
+data("curve_data", "time_Elapsed")
+rec <- time_downsample(time_Elapsed, curve_data, 16)
 time_downsampled <- rec$time_downsampled
 data_downsampled <- rec$data_downsampled
 }

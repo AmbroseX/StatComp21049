@@ -18,13 +18,83 @@ knitr::opts_chunk$set(
 library(StatComp21049)
 ```
 
+# Simple use
+
+```{.r}
+library(StatComp21049)
+## basic example code
+
+data("curve_data", "time_Elapsed", "w")
+## you can use your data to Proceed to the steps below
+rec <- Downsample(time_Elapsed, curve_data, 16)
+time_downsampled <- rec$time_downsampled
+data_downsampled <- rec$data_downsampled
+ev <- Get_Matrix_Eigens(data_downsampled)
+eigenvalues <- ev$values
+eigenvectors <- ev$vectors
+PCAmode <- 5
+K_delay <- 12
+Xeigenvector <- eigenvectors[, 1:PCAmode]
+X_PCA <- data_downsampled %*% Xeigenvector
+test_CurveFilter_embeddingdelay <- Embedding_delay(X_PCA, PCAmode, K_delay)
+X <- test_CurveFilter_embeddingdelay %*% w
+## Plot the projection
+plot(X[, 3], X[, 4], type = "l")
+plot(X[, 6], X[, 7], type = "l")
+```
+
 
 # The Guide to my functions
+
+
+
+
 
 ## Get_Matrix_Eigens
 
 
-# test
+
+## Downsample
+
+this is my function code
+
+``` {.r}
+Downsample <- function(timeseq, dataseq, dft=16){
+  sizedata <- dim(dataseq)
+  m <- sizedata[1]
+  n <- sizedata[2]
 
 
-# test
+  dt <- diff(timeseq)
+  meanft <- mean(1./dt)
+  rfolde <- round(meanft/dft)
+
+
+  if(rfolde > 1){
+    T <- ceiling(m/rfolde)
+    time_downsampled <- numeric(T)
+    data_downsampled <- matrix(0,T,n)
+    for(i in 1:T){
+      time_downsampled[i] <- timeseq[4*i-3]
+      for(j in 1:n){
+        data_downsampled[i,j] <- dataseq[4*i-3,j]
+      }
+    }
+  }
+  else{
+    time_downsampled <- timeseq
+    data_downsampled <- dataseq
+
+  }
+  rec <- list(time_downsampled = time_downsampled,data_downsampled=data_downsampled)
+  return(rec)
+}
+```
+
+We use it to downsample data
+
+```{r}
+
+
+```
+

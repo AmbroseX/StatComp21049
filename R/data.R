@@ -30,11 +30,3 @@
 #' [curve_data],[time_Elapsed]
 #' @source \url{http://www.wenlab.org/}
 "w"
-
-
-
-
-
-
-
-

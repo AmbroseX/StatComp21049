@@ -17,7 +17,7 @@ Returns a list of eigenvalues and eigenvectors for a matrix
 }
 \examples{
 \dontrun{
-X <- matrix(rnorm(200*100),200,100)
+X <- matrix(rnorm(200 * 100), 200, 100)
 ev <- Get_Matrix_Eigens(X)
 eigenvalues <- ev$values
 eigenvectors <- ev$vectors
